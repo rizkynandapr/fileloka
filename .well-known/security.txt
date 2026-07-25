@@ -1,0 +1,6 @@
+# ToolDock security contact (RFC 9116)
+# Replace the address below with your real inbox before launch.
+Contact: mailto:hello@tooldock.example
+Expires: 2027-07-25T00:00:00.000Z
+Preferred-Languages: en, id
+Policy: https://tooldock.example/#privacy
