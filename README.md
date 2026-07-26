@@ -134,7 +134,7 @@ Then: custom domain → replace contact email → add SRI hashes → submit site
 2. PWA (manifest + service worker) → true offline + "install app" on mobile.
 3. HEIC input (iPhone photos — very high search volume) via `heic2any`/WASM.
 4. OCR (Tesseract WASM), PDF↔Word server-side → the Pro tier.
-5. i18n: Bahasa Indonesia first (`/id/`), then ES/PT (Brazil/Colombia are top-5 markets).
+5. ~~i18n Bahasa Indonesia~~ — **shipped**: full `/id/` mirror (12 tool pages + home) with bidirectional hreflang, language switcher, Indonesian search-intent copy. Next locales: ES/PT. (Tool widget UI strings remain English for now — on the roadmap.)
 
 ---
 *Built July 2026. Stack: HTML/CSS/JS, pdf-lib, pdf.js, jszip, qrcodejs — all client-side.*

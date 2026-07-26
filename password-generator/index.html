@@ -6,8 +6,12 @@
 <title>Strong Random Password Generator — Free, On-Device | Fileloka</title>
 <meta name="description" content="Free strong password generator running entirely on your device. Cryptographically random, adjustable length and characters, entropy shown in bits.">
 <link rel="canonical" href="https://fileloka.id/password-generator/">
+<link rel="alternate" hreflang="en" href="https://fileloka.id/password-generator/">
+<link rel="alternate" hreflang="id" href="https://fileloka.id/id/password-generator/">
+<link rel="alternate" hreflang="x-default" href="https://fileloka.id/password-generator/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Fileloka">
+<meta property="og:locale" content="en_US">
 <meta property="og:title" content="Strong Random Password Generator — Free, On-Device | Fileloka">
 <meta property="og:description" content="Free strong password generator running entirely on your device. Cryptographically random, adjustable length and characters, entropy shown in bits.">
 <meta property="og:url" content="https://fileloka.id/password-generator/">
@@ -18,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@500;700;800&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css">
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "SoftwareApplication", "name": "Password generator — Fileloka", "url": "https://fileloka.id/password-generator/", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "description": "Free strong password generator running entirely on your device. Cryptographically random, adjustable length and characters, entropy shown in bits.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is this generator actually secure?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It uses crypto.getRandomValues — the same cryptographic randomness source password managers use — with unbiased sampling, and guarantees every selected character set appears. The code is open source, so this is verifiable."}}, {"@type": "Question", "name": "What do the entropy bits mean?", "acceptedAnswer": {"@type": "Answer", "text": "Entropy measures how hard a password is to brute-force. Roughly: 45 bits is weak, 70 is fair, 100+ is excellent. A 16-character password from all character sets lands around 100 bits — strong for anything."}}, {"@type": "Question", "name": "Is my password sent or stored anywhere?", "acceptedAnswer": {"@type": "Answer", "text": "No. It's generated in your browser's memory and exists only on your screen and clipboard. Nothing is transmitted or saved — refresh the page and it's gone."}}, {"@type": "Question", "name": "Should I avoid look-alike characters?", "acceptedAnswer": {"@type": "Answer", "text": "Turn that option on for passwords you'll read and type manually (Wi-Fi, TVs). For passwords stored in a manager, leave it off for a slightly larger character pool."}}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "SoftwareApplication", "name": "Password generator — Fileloka", "url": "https://fileloka.id/password-generator/", "inLanguage": "en", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "description": "Free strong password generator running entirely on your device. Cryptographically random, adjustable length and characters, entropy shown in bits.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}, {"@type": "FAQPage", "inLanguage": "en", "mainEntity": [{"@type": "Question", "name": "Is this generator actually secure?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It uses crypto.getRandomValues — the same cryptographic randomness source password managers use — with unbiased sampling, and guarantees every selected character set appears. The code is open source, so this is verifiable."}}, {"@type": "Question", "name": "What do the entropy bits mean?", "acceptedAnswer": {"@type": "Answer", "text": "Entropy measures how hard a password is to brute-force. Roughly: 45 bits is weak, 70 is fair, 100+ is excellent. A 16-character password from all character sets lands around 100 bits — strong for anything."}}, {"@type": "Question", "name": "Is my password sent or stored anywhere?", "acceptedAnswer": {"@type": "Answer", "text": "No. It's generated in your browser's memory and exists only on your screen and clipboard. Nothing is transmitted or saved — refresh the page and it's gone."}}, {"@type": "Question", "name": "Should I avoid look-alike characters?", "acceptedAnswer": {"@type": "Answer", "text": "Turn that option on for passwords you'll read and type manually (Wi-Fi, TVs). For passwords stored in a manager, leave it off for a slightly larger character pool."}}]}]}</script>
 </head>
 <body data-tool="password-generator">
 <header class="topbar">
@@ -29,7 +33,7 @@
     </a>
     <div class="topbar-actions">
       <span class="privacy-pill" title="All tools run locally in your browser"><span class="dot"></span>0 files uploaded — ever</span>
-      <button class="icon-btn" id="themeBtn" aria-label="Switch color theme">
+      <a class="lang-link" href="https://fileloka.id/id/password-generator/" aria-label="Switch language">ID</a><button class="icon-btn" id="themeBtn" aria-label="Switch color theme">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path id="themeIcon" d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
       </button>
     </div>

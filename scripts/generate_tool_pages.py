@@ -10,6 +10,8 @@ Run from the repo root:  python scripts/generate_tool_pages.py
 Commit the generated folders. Deploy stays a plain static upload.
 """
 import re, json, os, html, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from content_id import P_ID, NAMES, CARD_DESC_ID, UI, HOME_ID
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOMAIN = "https://fileloka.id"   # <- replaced once the real domain exists
@@ -221,98 +223,223 @@ P = {
    related=["jpg-to-pdf","merge-pdf","word-counter"]),
 }
 
-CAT = {  # breadcrumb-ish label per tool for the JSON-LD description
- "merge-pdf":"PDF tool","split-pdf":"PDF tool","compress-pdf":"PDF tool",
- "pdf-to-jpg":"PDF tool","jpg-to-pdf":"PDF tool","compress-image":"Image tool",
- "resize-image":"Image tool","convert-image":"Image tool","qr-code":"Everyday tool",
- "password-generator":"Everyday tool","word-counter":"Everyday tool","signature":"Everyday tool",
-}
 
-def main():
-    idx = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
+CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+SEARCH_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>'
+TODAY = "2026-07-26"
+LANGS = {"en": dict(prefix="", lang="en", locale="en_US"),
+         "id": dict(prefix="id/", lang="id", locale="id_ID")}
+CONTENT = {"en": P, "id": P_ID}
 
-    topbar = re.search(r'<header class="topbar">.*?</header>', idx, re.S).group(0)
-    topbar = topbar.replace('href="#" id="brandHome"', 'href="/"')
+def urls_for(tid):
+    en = f"{DOMAIN}/" + (tid + "/" if tid else "")
+    idu = f"{DOMAIN}/id/" + (tid + "/" if tid else "")
+    return en, idu
 
-    footer = re.search(r'<footer>.*?</footer>', idx, re.S).group(0)
-    footer = footer.replace('<a href="#" data-nav="home">Tools</a>', '<a href="/">All tools</a>')
-    footer = footer.replace('<a href="#faq">FAQ</a>', '<a href="/#faq">FAQ</a>')
-    footer = footer.replace('<a href="#privacy">Privacy</a>', '<a href="/#privacy">Privacy</a>')
+def hreflang_links(tid):
+    en, idu = urls_for(tid)
+    return (f'<link rel="alternate" hreflang="en" href="{en}">\n'
+            f'<link rel="alternate" hreflang="id" href="{idu}">\n'
+            f'<link rel="alternate" hreflang="x-default" href="{en}">')
 
-    ad = re.search(r'<aside class="ad-slot".*?</aside>', idx, re.S).group(0)
+def lang_link(target, label):
+    return f'<a class="lang-link" href="{target}" aria-label="Switch language">{label}</a>'
 
-    fonts = "\n".join(re.findall(r'<link rel="preconnect"[^>]*>|<link href="https://fonts[^>]*>', idx))
-    favicon = re.search(r'<link rel="icon"[^>]*>', idx).group(0)
-    theme = re.search(r'<meta name="theme-color"[^>]*>', idx)
-    theme = theme.group(0) if theme else ""
+def topbar_for(base, lang, twin):
+    tb = re.sub(r'<a class="lang-link"[^>]*>[^<]*</a>\s*', "", base)
+    if lang == "id":
+        tb = tb.replace("0 files uploaded — ever", UI["id"]["pill"])
+    m = re.search(r'<button[^>]*id="themeBtn"', tb)
+    return tb[:m.start()] + lang_link(twin, UI[lang]["lang_link"]) + tb[m.start():]
 
-    names = {k: re.sub(r"\s*\|\s*Fileloka$", "", v["title"]).split(" Online")[0] for k, v in P.items()}
-    display = {k: re.search(r"TOOLS\['"+k+r"'\]=\{\s*name:'([^']+)'", open(os.path.join(ROOT,"app.js"),encoding="utf-8").read()).group(1) for k in P}
+def footer_for(base, lang):
+    if lang == "en":
+        return base
+    f = base.replace('<a href="/">All tools</a>', '<a href="/id/">Beranda</a>')
+    f = f.replace('<a href="/#faq">FAQ</a>', '<a href="/id/#faq">FAQ</a>')
+    f = f.replace('<a href="/#privacy">Privacy</a>', '<a href="/id/#privacy">Privasi</a>')
+    return f
 
-    for tid, d in P.items():
-        url = f"{DOMAIN}/{tid}/"
-        faq_html = "\n".join(
-            f"<details>\n  <summary>{html.escape(q)}</summary>\n  <p>{html.escape(a)}</p>\n</details>"
-            for q, a in d["faqs"])
-        steps_html = "\n".join(f"<li>{html.escape(s)}</li>" for s in d["steps"])
-        rel_html = "\n".join(
-            f'<a class="rel-link" href="/{r}/">{html.escape(display[r])}</a>' for r in d["related"])
-        ld = {"@context":"https://schema.org","@graph":[
-            {"@type":"SoftwareApplication","name":display[tid]+" — Fileloka",
-             "url":url,"applicationCategory":"UtilitiesApplication","operatingSystem":"Any",
-             "description":d["meta"],
-             "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},
-            {"@type":"FAQPage","mainEntity":[
-                {"@type":"Question","name":q,
-                 "acceptedAnswer":{"@type":"Answer","text":a}} for q,a in d["faqs"]]}]}
-        page = f"""<!doctype html>
-<html lang="en">
+def render_tool(lang, tid, chrome):
+    cfg, d = LANGS[lang], CONTENT[lang][tid]
+    url = f"{DOMAIN}/{cfg['prefix']}{tid}/"
+    en_url, id_url = urls_for(tid)
+    twin = id_url if lang == "en" else en_url
+    ui = UI[lang]
+    faq_html = "\n".join(
+        f"<details>\n  <summary>{html.escape(q)}</summary>\n  <p>{html.escape(a)}</p>\n</details>"
+        for q, a in d["faqs"])
+    steps_html = "\n".join(f"<li>{html.escape(s)}</li>" for s in d["steps"])
+    rel_html = "\n".join(
+        f'<a class="rel-link" href="/{cfg["prefix"]}{r}/">{html.escape(NAMES[r][lang])}</a>'
+        for r in d["related"])
+    ld = {"@context":"https://schema.org","@graph":[
+        {"@type":"SoftwareApplication","name":NAMES[tid][lang]+" — Fileloka",
+         "url":url,"inLanguage":cfg["lang"],
+         "applicationCategory":"UtilitiesApplication","operatingSystem":"Any",
+         "description":d["meta"],
+         "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},
+        {"@type":"FAQPage","inLanguage":cfg["lang"],"mainEntity":[
+            {"@type":"Question","name":q,
+             "acceptedAnswer":{"@type":"Answer","text":a}} for q,a in d["faqs"]]}]}
+    page = f"""<!doctype html>
+<html lang="{cfg['lang']}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{html.escape(d["title"])}</title>
 <meta name="description" content="{html.escape(d["meta"])}">
 <link rel="canonical" href="{url}">
+{hreflang_links(tid)}
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Fileloka">
+<meta property="og:locale" content="{cfg['locale']}">
 <meta property="og:title" content="{html.escape(d["title"])}">
 <meta property="og:description" content="{html.escape(d["meta"])}">
 <meta property="og:url" content="{url}">
 <meta name="twitter:card" content="summary">
-{theme}
-{favicon}
-{fonts}
+{chrome['theme']}
+{chrome['favicon']}
+{chrome['fonts']}
 <link rel="stylesheet" href="/styles.css">
-<script type="application/ld+json">{json.dumps(ld,ensure_ascii=False)}</script>
+<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>
 </head>
 <body data-tool="{tid}">
-{topbar}
+{topbar_for(chrome['topbar'], lang, twin)}
 <main class="wrap">
   <div class="tool-hero">
-    <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H7m5 5-5-5 5-5"/></svg>All tools</a>
+    <a class="back" href="{'/' if lang=='en' else '/id/'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H7m5 5-5-5 5-5"/></svg>{ui['back']}</a>
     <h1>{html.escape(d["h1"])}</h1>
     <p class="lead">{html.escape(d["lead"])}</p>
   </div>
   <section class="view is-active" id="view-tool">
     <div id="toolMount"></div>
   </section>
-  {ad}
+  {chrome['ad']}
   <section class="section">
-    <h2>How it works</h2>
+    <h2>{ui['how']}</h2>
     <ol class="howto">
 {steps_html}
     </ol>
   </section>
   <section class="section faq">
-    <h2>Questions about this tool</h2>
+    <h2>{ui['faq']}</h2>
 {faq_html}
   </section>
   <section class="section">
-    <h2>Related tools</h2>
+    <h2>{ui['rel']}</h2>
     <div class="rel-links">
 {rel_html}
     </div>
   </section>
+</main>
+{footer_for(chrome['footer'], lang)}
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script src="/app.js" defer></script>
+</body>
+</html>
+"""
+    out = os.path.join(ROOT, cfg["prefix"] + tid)
+    os.makedirs(out, exist_ok=True)
+    open(os.path.join(out, "index.html"), "w", encoding="utf-8").write(page)
+
+def build_id_home(chrome, cards):
+    H = HOME_ID
+    proof = "\n".join(f"<li>{CHECK}{html.escape(p)}</li>" for p in H["proof"])
+    tabs = "\n".join(
+        f'<button class="tab" role="tab" aria-selected="{"true" if i==0 else "false"}" data-cat="{c}">{t}</button>'
+        for i,(c,t) in enumerate(H["tabs"]))
+    card_html = []
+    for tid, c in cards.items():
+        c2 = c.replace(f'href="/{tid}/"', f'href="/id/{tid}/"')
+        c2 = re.sub(r"<h3>[^<]*</h3>", f"<h3>{html.escape(NAMES[tid]['id'])}</h3>", c2)
+        c2 = re.sub(r"</h3><p>[^<]*</p>", f"</h3><p>{html.escape(CARD_DESC_ID[tid])}</p>", c2)
+        c2 = c2.replace(">Open tool <", ">Buka alat <")
+        card_html.append(c2)
+    faq_html = "\n".join(
+        f"<details>\n  <summary>{html.escape(q)}</summary>\n  <p>{html.escape(a)}</p>\n</details>"
+        for q, a in H["faqs"])
+    why = "\n".join(f"<p>{html.escape(p)}</p>" for p in H["why"])
+    priv0 = html.escape(H["privacy"][0])
+    priv1 = html.escape(H["privacy"][1]).replace(
+        "rizkynandapr@gmail.com",
+        '<a href="mailto:rizkynandapr@gmail.com">rizkynandapr@gmail.com</a>')
+    flinks = " ".join(f'<a href="{u}">{t}</a>' for t, u in H["footer_links"])
+    footer = re.sub(r"<nav>.*?</nav>", f"<nav>{flinks}</nav>", chrome["footer"], flags=re.S)
+    en_url, id_url = urls_for(None)
+    ld = {"@context":"https://schema.org","@type":"WebApplication","name":"Fileloka",
+          "url":id_url,"inLanguage":"id","applicationCategory":"UtilitiesApplication",
+          "operatingSystem":"Any","description":H["meta"],
+          "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+    page = f"""<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{html.escape(H["title"])}</title>
+<meta name="description" content="{html.escape(H["meta"])}">
+<link rel="canonical" href="{id_url}">
+{hreflang_links(None)}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Fileloka">
+<meta property="og:locale" content="id_ID">
+<meta property="og:title" content="{html.escape(H["title"])}">
+<meta property="og:description" content="{html.escape(H["meta"])}">
+<meta property="og:url" content="{id_url}">
+<meta name="twitter:card" content="summary">
+{chrome['theme']}
+{chrome['favicon']}
+{chrome['fonts']}
+<link rel="stylesheet" href="/styles.css">
+<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>
+</head>
+<body data-tool="none">
+{topbar_for(chrome['topbar'], 'id', '/')}
+<main>
+<section class="view is-active">
+  <div class="wrap">
+    <div class="hero">
+      <h1 class="rise">{H["h1"]}</h1>
+      <p class="lede rise" style="animation-delay:.06s">{H["lede"]}</p>
+      <ul class="proof rise" style="animation-delay:.12s">
+{proof}
+      </ul>
+    </div>
+    <div class="finder">
+      <div class="search">
+        {SEARCH_SVG}
+        <input type="search" id="searchInput" placeholder="{html.escape(H["search_ph"])}" aria-label="Cari alat">
+        <kbd>/</kbd>
+      </div>
+      <div>
+        <div class="tabs" role="tablist" aria-label="Kategori alat">
+{tabs}
+        </div>
+        <div class="tabs-rule"></div>
+      </div>
+    </div>
+    <div class="grid" id="toolGrid">
+{"".join(card_html)}
+    </div>
+    <p class="grid-empty" id="gridEmpty">{html.escape(H["grid_empty"])}</p>
+  </div>
+</section>
+<div class="wrap">
+  {chrome['ad']}
+  <section class="section">
+    <h2>{html.escape(H["why_h"])}</h2>
+{why}
+  </section>
+  <section class="section faq" id="faq">
+    <h2>{html.escape(H["faq_h"])}</h2>
+{faq_html}
+  </section>
+  <section class="section" id="privacy">
+    <h2>{html.escape(H["privacy_h"])}</h2>
+    <p>{priv0}</p>
+    <p>{priv1}</p>
+  </section>
+</div>
 </main>
 {footer}
 <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -320,21 +447,65 @@ def main():
 </body>
 </html>
 """
-        os.makedirs(os.path.join(ROOT, tid), exist_ok=True)
-        with open(os.path.join(ROOT, tid, "index.html"), "w", encoding="utf-8") as f:
-            f.write(page)
-        print("built", tid + "/index.html")
+    os.makedirs(os.path.join(ROOT, "id"), exist_ok=True)
+    open(os.path.join(ROOT, "id", "index.html"), "w", encoding="utf-8").write(page)
 
-    urls = [f"{DOMAIN}/"] + [f"{DOMAIN}/{tid}/" for tid in P]
+def patch_root_index():
+    p = os.path.join(ROOT, "index.html")
+    s = open(p, encoding="utf-8").read()
+    if 'hreflang' not in s:
+        anchor = '<meta property="og:url" content="https://fileloka.id/">'
+        s = s.replace(anchor, anchor + "\n" + hreflang_links(None), 1)
+    if 'lang-link' not in s:
+        m = re.search(r'<button[^>]*id="themeBtn"', s)
+        s = s[:m.start()] + lang_link("/id/", "ID") + s[m.start():]
+    open(p, "w", encoding="utf-8").write(s)
+
+def patch_css():
+    p = os.path.join(ROOT, "styles.css")
+    s = open(p, encoding="utf-8").read()
+    if ".lang-link" not in s:
+        s += ("\n.lang-link{display:inline-flex;align-items:center;padding:6px 11px;margin-right:10px;"
+              "border:1.5px solid var(--line);border-radius:999px;font-weight:700;font-size:.72rem;"
+              "letter-spacing:.06em;color:var(--muted);text-decoration:none}\n"
+              ".lang-link:hover{color:var(--accent);border-color:var(--accent)}\n")
+        open(p, "w", encoding="utf-8").write(s)
+
+def main():
+    idx = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
+    topbar = re.search(r'<header class="topbar">.*?</header>', idx, re.S).group(0)
+    topbar = topbar.replace('href="#" id="brandHome"', 'href="/"')
+    footer = re.search(r"<footer>.*?</footer>", idx, re.S).group(0)
+    footer = footer.replace('<a href="#" data-nav="home">Tools</a>', '<a href="/">All tools</a>')
+    footer = footer.replace('<a href="#faq">FAQ</a>', '<a href="/#faq">FAQ</a>')
+    footer = footer.replace('<a href="#privacy">Privacy</a>', '<a href="/#privacy">Privacy</a>')
+    ad = re.search(r'<aside class="ad-slot".*?</aside>', idx, re.S).group(0)
+    fonts = "\n".join(re.findall(r'<link rel="preconnect"[^>]*>|<link href="https://fonts[^>]*>', idx))
+    favicon = re.search(r'<link rel="icon"[^>]*>', idx).group(0)
+    theme_m = re.search(r'<meta name="theme-color"[^>]*>', idx)
+    chrome = dict(topbar=topbar, footer=footer, ad=ad, fonts=fonts, favicon=favicon,
+                  theme=theme_m.group(0) if theme_m else "")
+    cards = {}
+    for tid in P:
+        m = re.search(r'<a class="card" href="/' + tid + r'/".*?</a>', idx, re.S)
+        cards[tid] = m.group(0)
+    for lang in ("en", "id"):
+        for tid in P:
+            render_tool(lang, tid, chrome)
+    build_id_home(chrome, cards)
+    patch_root_index()
+    patch_css()
+    urls = [f"{DOMAIN}/", f"{DOMAIN}/id/"]
+    urls += [f"{DOMAIN}/{t}/" for t in P] + [f"{DOMAIN}/id/{t}/" for t in P]
     sm = ['<?xml version="1.0" encoding="UTF-8"?>',
           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u in urls:
-        sm += ["  <url>", f"    <loc>{u}</loc>", "    <lastmod>2026-07-25</lastmod>", "  </url>"]
+        sm += ["  <url>", f"    <loc>{u}</loc>", f"    <lastmod>{TODAY}</lastmod>", "  </url>"]
     sm.append("</urlset>")
     open(os.path.join(ROOT, "sitemap.xml"), "w").write("\n".join(sm) + "\n")
     open(os.path.join(ROOT, "robots.txt"), "w").write(
         f"User-agent: *\nAllow: /\n\nSitemap: {DOMAIN}/sitemap.xml\n")
-    print("built sitemap.xml + robots.txt (", len(urls), "URLs )")
+    print("built", 2 * len(P), "tool pages +", "/id/ home |", len(urls), "URLs in sitemap")
 
 if __name__ == "__main__":
     sys.exit(main())

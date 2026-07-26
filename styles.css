@@ -356,3 +356,6 @@ footer{border-top:1px solid var(--line); margin-top:50px; padding:30px 0 42px; c
 .rel-link{display:inline-flex;align-items:center;padding:10px 16px;border:1.5px solid var(--line);border-radius:999px;font-weight:600;font-size:.95rem;color:var(--fg);text-decoration:none;background:var(--card)}
 .rel-link:hover{border-color:var(--accent);color:var(--accent)}
 body[data-tool] main.wrap{padding-top:8px}
+
+.lang-link{display:inline-flex;align-items:center;padding:6px 11px;margin-right:10px;border:1.5px solid var(--line);border-radius:999px;font-weight:700;font-size:.72rem;letter-spacing:.06em;color:var(--muted);text-decoration:none}
+.lang-link:hover{color:var(--accent);border-color:var(--accent)}
