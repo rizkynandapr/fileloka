@@ -1,6 +1,6 @@
 # Fileloka security contact (RFC 9116)
 # Replace the address below with your real inbox before launch.
-Contact: mailto:hello@fileloka.example
+Contact: mailto:rizkynandapr@gmail.com
 Expires: 2027-07-25T00:00:00.000Z
 Preferred-Languages: en, id
-Policy: https://fileloka.example/#privacy
+Policy: https://fileloka.id/#privacy

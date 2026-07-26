@@ -1,55 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://fileloka.example/</loc>
+    <loc>https://fileloka.id/</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://fileloka.example/merge-pdf/</loc>
+    <loc>https://fileloka.id/merge-pdf/</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://fileloka.example/split-pdf/</loc>
+    <loc>https://fileloka.id/split-pdf/</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://fileloka.example/compress-pdf/</loc>
+    <loc>https://fileloka.id/compress-pdf/</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://fileloka.example/pdf-to-jpg/</loc>
+    <loc>https://fileloka.id/pdf-to-jpg/</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://fileloka.example/jpg-to-pdf/</loc>
+    <loc>https://fileloka.id/jpg-to-pdf/</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://fileloka.example/compress-image/</loc>
+    <loc>https://fileloka.id/compress-image/</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://fileloka.example/resize-image/</loc>
+    <loc>https://fileloka.id/resize-image/</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://fileloka.example/convert-image/</loc>
+    <loc>https://fileloka.id/convert-image/</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://fileloka.example/qr-code/</loc>
+    <loc>https://fileloka.id/qr-code/</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://fileloka.example/password-generator/</loc>
+    <loc>https://fileloka.id/password-generator/</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://fileloka.example/word-counter/</loc>
+    <loc>https://fileloka.id/word-counter/</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://fileloka.example/signature/</loc>
+    <loc>https://fileloka.id/signature/</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
 </urlset>

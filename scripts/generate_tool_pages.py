@@ -12,7 +12,7 @@ Commit the generated folders. Deploy stays a plain static upload.
 import re, json, os, html, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DOMAIN = "https://fileloka.example"   # <- replaced once the real domain exists
+DOMAIN = "https://fileloka.id"   # <- replaced once the real domain exists
 
 P = {
  "merge-pdf": dict(

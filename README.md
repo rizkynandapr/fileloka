@@ -77,7 +77,7 @@ Checklist status:
 | Honest privacy note + contact placeholder in-page | ✅ (replace the email before launch) |
 
 **Before launch (see SECURITY.md for the full runbook):**
-1. Replace `hello@fileloka.example` with a real address (page footer + `.well-known/security.txt`).
+1. Replace `rizkynandapr@gmail.com` with a real address (page footer + `.well-known/security.txt`).
 2. Lock down the *accounts* (GitHub/Vercel/registrar 2FA, registrar lock, DNSSEC) — for a hardened static site, account takeover is the #1 residual risk.
 3. Optional next level: self-host the three Google Fonts → zero third-party requests of any kind (steps in SECURITY.md §4).
 4. When you add AdSense later, you will consciously loosen the CSP for Google's domains — the current CSP correctly blocks ads until you do.
