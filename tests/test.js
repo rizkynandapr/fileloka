@@ -1,4 +1,4 @@
-/* ToolDock core-logic test suite.
+/* Fileloka core-logic test suite.
  * Mirrors the exact functions shipped in index.html, using the same
  * pdf-lib@1.17.1 / jszip@3.10.1 versions loaded from cdnjs in production. */
 const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');

@@ -99,7 +99,7 @@ function route(){
     homeView.classList.remove('is-active');
     toolView.classList.add('is-active');
     mount.innerHTML='';
-    document.title=TOOLS[id].name+' — ToolDock';
+    document.title=TOOLS[id].name+' — Fileloka';
     let files=null;
     if(pendingFiles){files=pendingFiles.filter(TOOLS[id].match);pendingFiles=null;if(!files.length)files=null;}
     TOOLS[id].mount(mount,files);
@@ -267,7 +267,7 @@ function showResult(root,{title,stats,items,note}){
         const zip=new JSZip();
         for(const it of items)zip.file(it.name,it.blob);
         const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE'});
-        downloadBlob(blob,(items.zipName||'tooldock-files')+'.zip');
+        downloadBlob(blob,(items.zipName||'fileloka-files')+'.zip');
       }catch(err){toast(err.message,true);}finally{setBusy(zipBtn,false);}
     });
     acts.appendChild(zipBtn);

@@ -1,6 +1,6 @@
-# ToolDock security contact (RFC 9116)
+# Fileloka security contact (RFC 9116)
 # Replace the address below with your real inbox before launch.
-Contact: mailto:hello@tooldock.example
+Contact: mailto:hello@fileloka.example
 Expires: 2027-07-25T00:00:00.000Z
 Preferred-Languages: en, id
-Policy: https://tooldock.example/#privacy
+Policy: https://fileloka.example/#privacy

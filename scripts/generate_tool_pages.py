@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate static per-tool landing pages for ToolDock.
+"""Generate static per-tool landing pages for Fileloka.
 
 Each tool gets a real URL (/merge-pdf/, /split-pdf/, ...) with unique
 title, description, intro, steps, FAQ and JSON-LD - the pages Google can
@@ -12,11 +12,11 @@ Commit the generated folders. Deploy stays a plain static upload.
 import re, json, os, html, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DOMAIN = "https://tooldock.example"   # <- replaced once the real domain exists
+DOMAIN = "https://fileloka.example"   # <- replaced once the real domain exists
 
 P = {
  "merge-pdf": dict(
-   title="Merge PDF Files Online Free — No Upload | ToolDock",
+   title="Merge PDF Files Online Free — No Upload | Fileloka",
    h1="Merge PDF files into one document",
    lead="Combine two or more PDFs into a single file, in exactly the order you choose. Unlike other merge tools, your documents are never uploaded — everything happens inside your browser, so contracts, invoices and reports stay on your device.",
    meta="Combine multiple PDF files into one, free and without uploading. Reorder pages, merge locally in your browser — files never leave your device.",
@@ -33,7 +33,7 @@ P = {
           "Most merge sites upload your files to a server, process them there, and promise to delete them later. Here there is no server step at all — you can watch the Network tab in your browser's dev tools and see that nothing is sent.")],
    related=["split-pdf","compress-pdf","jpg-to-pdf"]),
  "split-pdf": dict(
-   title="Split PDF & Extract Pages Online Free — No Upload | ToolDock",
+   title="Split PDF & Extract Pages Online Free — No Upload | Fileloka",
    h1="Split a PDF — extract exactly the pages you need",
    lead="Pull specific pages or page ranges out of a PDF (like 1-3, 7), or save every page as its own file. Processing runs entirely on your device, which makes this one of the few PDF extractors that never sees your document.",
    meta="Extract pages from a PDF or split every page into separate files — free, private, no upload. Enter ranges like 1-3, 7 and download instantly.",
@@ -50,7 +50,7 @@ P = {
           "Never. The file is read into your browser's memory, split there, and discarded when you close the tab. You can even disconnect from the internet after the page loads and the tool keeps working.")],
    related=["merge-pdf","pdf-to-jpg","compress-pdf"]),
  "compress-pdf": dict(
-   title="Compress PDF Online Free — Shrink Size, No Upload | ToolDock",
+   title="Compress PDF Online Free — Shrink Size, No Upload | Fileloka",
    h1="Compress a PDF to fit email and upload limits",
    lead="Shrink a PDF right in your browser. Balanced mode re-packs the file and keeps text selectable; Strong mode redraws pages as compressed images for the smallest possible size — you see before/after sizes before downloading.",
    meta="Reduce PDF file size for free without uploading. Two modes: keep selectable text, or maximum compression. See the size saving before you download.",
@@ -67,7 +67,7 @@ P = {
           "Yes. Compression happens on your device; the file is never transmitted. That's a structural guarantee, not a policy promise — there is no server that could store or leak it.")],
    related=["merge-pdf","split-pdf","compress-image"]),
  "pdf-to-jpg": dict(
-   title="PDF to JPG Converter Online Free — No Upload | ToolDock",
+   title="PDF to JPG Converter Online Free — No Upload | Fileloka",
    h1="Convert PDF pages to JPG images",
    lead="Turn every page of a PDF into a high-quality JPG — for slides, sharing on chat apps, or embedding in documents. Choose quality and detail level, preview thumbnails, and download one image or a ZIP of all pages.",
    meta="Convert PDF to JPG images free, without uploading. Choose quality and resolution, preview pages, download single images or a ZIP.",
@@ -84,7 +84,7 @@ P = {
           "No. Rendering happens locally via pdf.js in your browser. Nothing is sent anywhere — verifiable in your browser's Network tab.")],
    related=["jpg-to-pdf","compress-image","split-pdf"]),
  "jpg-to-pdf": dict(
-   title="JPG to PDF Converter Online Free — Images to PDF, No Upload | ToolDock",
+   title="JPG to PDF Converter Online Free — Images to PDF, No Upload | Fileloka",
    h1="Turn images into a clean PDF document",
    lead="Pack photos, scans and screenshots (JPG, PNG or WebP) into one tidy PDF. Reorder pages, choose between matching the image size or standard A4, add margins — all without your pictures ever leaving your device.",
    meta="Convert JPG, PNG or WebP images to PDF free, without uploading. Reorder pages, pick A4 or original size, add margins, download instantly.",
@@ -101,7 +101,7 @@ P = {
           "Yes. The PDF is assembled in your browser's memory using pdf-lib. Your photos are never transmitted, stored, or seen by anyone.")],
    related=["pdf-to-jpg","compress-image","merge-pdf"]),
  "compress-image": dict(
-   title="Compress Images Online Free — JPG, PNG, WebP, No Upload | ToolDock",
+   title="Compress Images Online Free — JPG, PNG, WebP, No Upload | Fileloka",
    h1="Compress images without losing what matters",
    lead="Cut photo file sizes hard — for web forms, email attachments and faster websites — while keeping them sharp. Batch-compress JPG, PNG and WebP, optionally cap the width, and see the exact savings per file.",
    meta="Compress JPG, PNG and WebP images for free without uploading. Batch processing, quality control, max-width resize, EXIF removed automatically.",
@@ -118,7 +118,7 @@ P = {
           "No — compression runs on your device using your browser's own image engine. Nothing is transmitted, which also makes it fast: there's no upload wait at all.")],
    related=["resize-image","convert-image","jpg-to-pdf"]),
  "resize-image": dict(
-   title="Resize Images Online Free — Exact Pixels or Percent, No Upload | ToolDock",
+   title="Resize Images Online Free — Exact Pixels or Percent, No Upload | Fileloka",
    h1="Resize images to exact pixels or a percentage",
    lead="Scale pictures to precise dimensions for profile photos, marketplaces, forms and documents. Keep proportions automatically or set exact width × height — in batch, privately, on your own device.",
    meta="Resize JPG, PNG and WebP images free without uploading. Exact pixel dimensions or percentage scaling, batch support, proportions kept automatically.",
@@ -135,7 +135,7 @@ P = {
           "No. Resizing uses your browser's canvas engine locally. Your images never leave your device.")],
    related=["compress-image","convert-image","jpg-to-pdf"]),
  "convert-image": dict(
-   title="Convert Images Online Free — JPG, PNG, WebP, No Upload | ToolDock",
+   title="Convert Images Online Free — JPG, PNG, WebP, No Upload | Fileloka",
    h1="Convert images between JPG, PNG and WebP",
    lead="Switch formats in one click: WebP screenshots to JPG for compatibility, JPG to PNG for editing, anything to WebP for smaller web images. Batch conversion, quality control, and zero uploads.",
    meta="Convert images between JPG, PNG and WebP free, without uploading. Batch conversion with quality control — fast, private, in your browser.",
@@ -152,7 +152,7 @@ P = {
           "No — your browser's own canvas engine re-encodes the image locally. Files are never transmitted, which is also why conversion is instant.")],
    related=["compress-image","resize-image","pdf-to-jpg"]),
  "qr-code": dict(
-   title="Free QR Code Generator — PNG Download, No Sign-up | ToolDock",
+   title="Free QR Code Generator — PNG Download, No Sign-up | Fileloka",
    h1="Make a QR code for any link or text",
    lead="Type a link, Wi-Fi note or any text and get a crisp, scannable QR code in seconds — sized for screens, print or posters. No account, no watermark, and the code is generated on your device.",
    meta="Generate QR codes free — no sign-up, no watermark. Download as PNG in screen, print or poster sizes. Created locally in your browser.",
@@ -169,7 +169,7 @@ P = {
           "No. The code is drawn locally in your browser, which matters if you're encoding private links, Wi-Fi details or contact info.")],
    related=["password-generator","word-counter","signature"]),
  "password-generator": dict(
-   title="Strong Random Password Generator — Free, On-Device | ToolDock",
+   title="Strong Random Password Generator — Free, On-Device | Fileloka",
    h1="Generate strong random passwords",
    lead="Create genuinely random passwords using your browser's cryptographic engine — with length, character sets and look-alike filtering under your control, and an honest entropy meter instead of vague 'strength' colors.",
    meta="Free strong password generator running entirely on your device. Cryptographically random, adjustable length and characters, entropy shown in bits.",
@@ -186,7 +186,7 @@ P = {
           "Turn that option on for passwords you'll read and type manually (Wi-Fi, TVs). For passwords stored in a manager, leave it off for a slightly larger character pool.")],
    related=["qr-code","word-counter","signature"]),
  "word-counter": dict(
-   title="Word Counter — Words, Characters & Reading Time | ToolDock",
+   title="Word Counter — Words, Characters & Reading Time | Fileloka",
    h1="Count words, characters and reading time",
    lead="Paste or type text and get live counts: words, characters (with and without spaces), sentences, paragraphs, unique words, plus estimated reading and speaking time — handy for essays, ads, and speeches.",
    meta="Free live word counter: words, characters, sentences, paragraphs, unique words, reading and speaking time. Your text never leaves your browser.",
@@ -203,7 +203,7 @@ P = {
           "No. Counting happens in your browser as you type; nothing is transmitted or stored. Paste confidential drafts freely.")],
    related=["password-generator","qr-code","signature"]),
  "signature": dict(
-   title="Draw Your Signature Online Free — Transparent PNG | ToolDock",
+   title="Draw Your Signature Online Free — Transparent PNG | Fileloka",
    h1="Draw a signature and save it as a PNG",
    lead="Sign with your mouse, finger or stylus and download a clean signature image — transparent PNG for dropping onto documents, or white background for forms. Smooth strokes, undo, ink colors, nothing uploaded.",
    meta="Create a handwritten signature online free — draw with mouse or touch, download as transparent PNG. Runs on your device; nothing is uploaded.",
@@ -246,7 +246,7 @@ def main():
     theme = re.search(r'<meta name="theme-color"[^>]*>', idx)
     theme = theme.group(0) if theme else ""
 
-    names = {k: re.sub(r"\s*\|\s*ToolDock$", "", v["title"]).split(" Online")[0] for k, v in P.items()}
+    names = {k: re.sub(r"\s*\|\s*Fileloka$", "", v["title"]).split(" Online")[0] for k, v in P.items()}
     display = {k: re.search(r"TOOLS\['"+k+r"'\]=\{\s*name:'([^']+)'", open(os.path.join(ROOT,"app.js"),encoding="utf-8").read()).group(1) for k in P}
 
     for tid, d in P.items():
@@ -258,7 +258,7 @@ def main():
         rel_html = "\n".join(
             f'<a class="rel-link" href="/{r}/">{html.escape(display[r])}</a>' for r in d["related"])
         ld = {"@context":"https://schema.org","@graph":[
-            {"@type":"SoftwareApplication","name":display[tid]+" — ToolDock",
+            {"@type":"SoftwareApplication","name":display[tid]+" — Fileloka",
              "url":url,"applicationCategory":"UtilitiesApplication","operatingSystem":"Any",
              "description":d["meta"],
              "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},
@@ -274,7 +274,7 @@ def main():
 <meta name="description" content="{html.escape(d["meta"])}">
 <link rel="canonical" href="{url}">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="ToolDock">
+<meta property="og:site_name" content="Fileloka">
 <meta property="og:title" content="{html.escape(d["title"])}">
 <meta property="og:description" content="{html.escape(d["meta"])}">
 <meta property="og:url" content="{url}">

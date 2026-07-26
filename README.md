@@ -1,6 +1,6 @@
-# ToolDock — free file tools that never see your files
+# Fileloka — free file tools that never see your files
 
-![tests](https://github.com/rizkynandapr/tooldock/actions/workflows/test.yml/badge.svg)
+![tests](https://github.com/rizkynandapr/fileloka/actions/workflows/test.yml/badge.svg)
 
 A single-file, production-ready website in the iLovePDF category, with one structural difference that doubles as its security model and its marketing angle: **every tool runs 100% client-side.** Files are never uploaded — there is no backend at all.
 
@@ -16,7 +16,7 @@ Decision inputs, gathered before building (July 2026):
 - Its top markets are India, **Indonesia (#2)**, Brazil, US, Colombia — utility tools are a genuinely universal, worldwide need, strongest in mobile-first emerging markets.
 - The universally demanded core across iLovePDF/Smallpdf/PDF24/Adobe's free tools is stable: **merge, split, compress, PDF↔image**, plus image compress/resize/convert.
 - iLovePDF is bootstrapped and profitable: freemium subscriptions provide 80–90% of revenue, the rest from a single small ad banner — proof the model works without VC money.
-- Every major competitor's FAQ leads with the same user anxiety: "is my file safe? when is it deleted from your servers?" They answer with encryption promises. **ToolDock answers by removing the server.** That is the wedge.
+- Every major competitor's FAQ leads with the same user anxiety: "is my file safe? when is it deleted from your servers?" They answer with encryption promises. **Fileloka answers by removing the server.** That is the wedge.
 
 Sources: Similarweb, Semrush, Ahrefs-style trackers for ilovepdf.com; iLovePDF case studies (marketingcrafted.com, lettersbydavey.com); competitor tool pages (Smallpdf, Adobe, PDF24, FreeConvert).
 
@@ -49,7 +49,7 @@ Deliberately **excluded from v1** (need a server or heavy WASM): PDF↔Word/Exce
   - `jszip@3.10.1` — multi-file downloads
   - `qrcodejs@1.0.0` — QR codes
   - Image tools use the native Canvas API — no library.
-- **Signature UX features:** drop a file *anywhere* on the page and ToolDock suggests matching tools; hash routing (`#/merge-pdf`) makes every tool linkable; dark mode; `/` to search; keyboard + reduced-motion + focus-visible accessibility.
+- **Signature UX features:** drop a file *anywhere* on the page and Fileloka suggests matching tools; hash routing (`#/merge-pdf`) makes every tool linkable; dark mode; `/` to search; keyboard + reduced-motion + focus-visible accessibility.
 - No `localStorage`/`sessionStorage`, no cookies, no analytics, no external requests besides cdnjs + Google Fonts.
 
 **Design system (intentionally not the default AI look):** porcelain `#F3F5F4` / ink `#12151A` / cobalt `#2440E8` / manila `#F0E4C3`; type = Gabarito (display) + Public Sans (body — literally designed for government documents) + IBM Plex Mono (numbers). The signature element is the **manila-folder tab on every tool card**, which carries the category label.
@@ -77,7 +77,7 @@ Checklist status:
 | Honest privacy note + contact placeholder in-page | ✅ (replace the email before launch) |
 
 **Before launch (see SECURITY.md for the full runbook):**
-1. Replace `hello@tooldock.example` with a real address (page footer + `.well-known/security.txt`).
+1. Replace `hello@fileloka.example` with a real address (page footer + `.well-known/security.txt`).
 2. Lock down the *accounts* (GitHub/Vercel/registrar 2FA, registrar lock, DNSSEC) — for a hardened static site, account takeover is the #1 residual risk.
 3. Optional next level: self-host the three Google Fonts → zero third-party requests of any kind (steps in SECURITY.md §4).
 4. When you add AdSense later, you will consciously loosen the CSP for Google's domains — the current CSP correctly blocks ads until you do.
@@ -123,7 +123,7 @@ Checklist status:
 
 ```bash
 # Option A — Vercel CLI
-cd tooldock && vercel --prod
+cd fileloka && vercel --prod
 # Option B — drag-and-drop the folder at vercel.com/new
 # Option C — Netlify/Cloudflare Pages: same files; port the headers from vercel.json
 ```

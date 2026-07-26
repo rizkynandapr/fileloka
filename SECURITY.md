@@ -1,4 +1,4 @@
-# ToolDock — Security Model & Runbook
+# Fileloka — Security Model & Runbook
 
 Baca ini sebelum launch. Bagian 1–2 menjelaskan apa yang sudah dikerjakan di kode; bagian 3 adalah hal yang **hanya kamu** yang bisa lakukan (akun & domain) — dan itu justru risiko terbesar yang tersisa.
 
@@ -97,13 +97,13 @@ Untuk situs statis yang sudah dikeraskan, jalur pembobolan yang realistis bukan 
 
 **Lokal (untuk testing) — jangan double-click file** (pdf.js Worker diblokir di `file://` oleh Chrome):
 ```bash
-cd tooldock
+cd fileloka
 python3 -m http.server 8000        # atau: npx serve .
 # buka http://localhost:8000
 ```
 
 **Production:**
 ```bash
-cd tooldock && vercel --prod       # atau drag-drop folder di vercel.com/new
+cd fileloka && vercel --prod       # atau drag-drop folder di vercel.com/new
 ```
 HTTPS + sertifikat otomatis dari Vercel; semua header §2.3 aktif dari `vercel.json` tanpa konfigurasi tambahan. Setelah deploy, cek nilai di securityheaders.com (target: A/A+) dan observatory.mozilla.org.

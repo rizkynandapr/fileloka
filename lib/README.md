@@ -2,7 +2,7 @@
 
 These files are vendored (unmodified) from their official releases and remain
 under their own licenses. The MIT License in the repository root covers
-ToolDock's own source only, not these dependencies.
+Fileloka's own source only, not these dependencies.
 
 | File                | Library    | Version   | License       |
 |---------------------|------------|-----------|---------------|
