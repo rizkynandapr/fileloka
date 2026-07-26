@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Strong Random Password Generator — Free, On-Device | ToolDock</title>
+<meta name="description" content="Free strong password generator running entirely on your device. Cryptographically random, adjustable length and characters, entropy shown in bits.">
+<link rel="canonical" href="https://tooldock.example/password-generator/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ToolDock">
+<meta property="og:title" content="Strong Random Password Generator — Free, On-Device | ToolDock">
+<meta property="og:description" content="Free strong password generator running entirely on your device. Cryptographically random, adjustable length and characters, entropy shown in bits.">
+<meta property="og:url" content="https://tooldock.example/password-generator/">
+<meta name="twitter:card" content="summary">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M3 9c0-2 1-3 3-3h7l3 3h10c2 0 3 1 3 3v12c0 2-1 3-3 3H6c-2 0-3-1-3-3z' fill='%232440E8'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@500;700;800&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "SoftwareApplication", "name": "Password generator — ToolDock", "url": "https://tooldock.example/password-generator/", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "description": "Free strong password generator running entirely on your device. Cryptographically random, adjustable length and characters, entropy shown in bits.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is this generator actually secure?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It uses crypto.getRandomValues — the same cryptographic randomness source password managers use — with unbiased sampling, and guarantees every selected character set appears. The code is open source, so this is verifiable."}}, {"@type": "Question", "name": "What do the entropy bits mean?", "acceptedAnswer": {"@type": "Answer", "text": "Entropy measures how hard a password is to brute-force. Roughly: 45 bits is weak, 70 is fair, 100+ is excellent. A 16-character password from all character sets lands around 100 bits — strong for anything."}}, {"@type": "Question", "name": "Is my password sent or stored anywhere?", "acceptedAnswer": {"@type": "Answer", "text": "No. It's generated in your browser's memory and exists only on your screen and clipboard. Nothing is transmitted or saved — refresh the page and it's gone."}}, {"@type": "Question", "name": "Should I avoid look-alike characters?", "acceptedAnswer": {"@type": "Answer", "text": "Turn that option on for passwords you'll read and type manually (Wi-Fi, TVs). For passwords stored in a manager, leave it off for a slightly larger character pool."}}]}]}</script>
+</head>
+<body data-tool="password-generator">
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="/" aria-label="ToolDock home">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 9c0-2 1-3 3-3h7l3 3h10c2 0 3 1 3 3v12c0 2-1 3-3 3H6c-2 0-3-1-3-3z" fill="var(--accent)"/><path d="M3 13h26" stroke="var(--bg)" stroke-width="1.6"/></svg>
+      <span class="brand-name">Tool<em>Dock</em></span>
+    </a>
+    <div class="topbar-actions">
+      <span class="privacy-pill" title="All tools run locally in your browser"><span class="dot"></span>0 files uploaded — ever</span>
+      <button class="icon-btn" id="themeBtn" aria-label="Switch color theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path id="themeIcon" d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+  <div class="tool-hero">
+    <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H7m5 5-5-5 5-5"/></svg>All tools</a>
+    <h1>Generate strong random passwords</h1>
+    <p class="lead">Create genuinely random passwords using your browser&#x27;s cryptographic engine — with length, character sets and look-alike filtering under your control, and an honest entropy meter instead of vague &#x27;strength&#x27; colors.</p>
+  </div>
+  <section class="view is-active" id="view-tool">
+    <div id="toolMount"></div>
+  </section>
+  <aside class="ad-slot" aria-label="Advertisement placeholder">
+      <span>Advertisement</span>
+      <small>This single ad keeps every tool free.</small>
+    </aside>
+  <section class="section">
+    <h2>How it works</h2>
+    <ol class="howto">
+<li>Set the length (16+ recommended) and which character sets to include.</li>
+<li>Optionally avoid look-alike characters (l, 1, O, 0) for passwords you&#x27;ll type by hand.</li>
+<li>Copy the password — a new one is generated every time you change anything.</li>
+    </ol>
+  </section>
+  <section class="section faq">
+    <h2>Questions about this tool</h2>
+<details>
+  <summary>Is this generator actually secure?</summary>
+  <p>Yes. It uses crypto.getRandomValues — the same cryptographic randomness source password managers use — with unbiased sampling, and guarantees every selected character set appears. The code is open source, so this is verifiable.</p>
+</details>
+<details>
+  <summary>What do the entropy bits mean?</summary>
+  <p>Entropy measures how hard a password is to brute-force. Roughly: 45 bits is weak, 70 is fair, 100+ is excellent. A 16-character password from all character sets lands around 100 bits — strong for anything.</p>
+</details>
+<details>
+  <summary>Is my password sent or stored anywhere?</summary>
+  <p>No. It&#x27;s generated in your browser&#x27;s memory and exists only on your screen and clipboard. Nothing is transmitted or saved — refresh the page and it&#x27;s gone.</p>
+</details>
+<details>
+  <summary>Should I avoid look-alike characters?</summary>
+  <p>Turn that option on for passwords you&#x27;ll read and type manually (Wi-Fi, TVs). For passwords stored in a manager, leave it off for a slightly larger character pool.</p>
+</details>
+  </section>
+  <section class="section">
+    <h2>Related tools</h2>
+    <div class="rel-links">
+<a class="rel-link" href="/qr-code/">QR code maker</a>
+<a class="rel-link" href="/word-counter/">Word counter</a>
+<a class="rel-link" href="/signature/">Signature maker</a>
+    </div>
+  </section>
+</main>
+<footer>
+  <div class="wrap foot-in">
+    <div>© 2026 ToolDock — every tool runs on your device.</div>
+    <nav>
+      <a href="/">All tools</a>
+      <a href="/#faq">FAQ</a>
+      <a href="/#privacy">Privacy</a>
+    </nav>
+  </div>
+</footer>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script src="/app.js" defer></script>
+</body>
+</html>

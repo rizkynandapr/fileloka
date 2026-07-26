@@ -130,7 +130,7 @@ cd tooldock && vercel --prod
 Then: custom domain → replace contact email → add SRI hashes → submit sitemap to Google Search Console.
 
 ## 7. Roadmap
-1. **SEO split:** pre-render each tool as its own static page (`/merge-pdf/index.html`) sharing the same JS — hash-SPA is fine for launch, per-URL pages are what ranks.
+1. ~~**SEO split**~~ — **shipped**: every tool now has its own indexable page (`/merge-pdf/`, `/split-pdf/`, …) with unique title, intro, FAQ + FAQPage/SoftwareApplication schema, plus `sitemap.xml` and `robots.txt`. Regenerate after copy edits with `python scripts/generate_tool_pages.py`.
 2. PWA (manifest + service worker) → true offline + "install app" on mobile.
 3. HEIC input (iPhone photos — very high search volume) via `heic2any`/WASM.
 4. OCR (Tesseract WASM), PDF↔Word server-side → the Pro tier.
@@ -138,3 +138,9 @@ Then: custom domain → replace contact email → add SRI hashes → submit site
 
 ---
 *Built July 2026. Stack: HTML/CSS/JS, pdf-lib, pdf.js, jszip, qrcodejs — all client-side.*
+
+---
+
+## License
+
+MIT © 2026 Rizky Nanda Praditia — see [LICENSE](LICENSE). Bundled libraries in `/lib` keep their own licenses (see [lib/README.md](lib/README.md)).

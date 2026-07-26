@@ -3,7 +3,7 @@
 /* ================= core utils ================= */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-const on=(el,ev,fn,o)=>el.addEventListener(ev,fn,o);
+const on=(el,ev,fn,o)=>{if(el)el.addEventListener(ev,fn,o);};
 const DEFAULT_TITLE=document.title;
 
 function h(html){const t=document.createElement('template');t.innerHTML=html.trim();return t.content.firstElementChild;}
@@ -49,11 +49,11 @@ const I={
 
 /* ================= lazy CDN libraries ================= */
 const CDN={
-  pdfLib:{src:'lib/pdf-lib.min.js',ok:()=>window.PDFLib},
-  pdfjs:{src:'lib/pdf.min.js',ok:()=>window.pdfjsLib,
-         after(){window.pdfjsLib.GlobalWorkerOptions.workerSrc='lib/pdf.worker.min.js';}},
-  jszip:{src:'lib/jszip.min.js',ok:()=>window.JSZip},
-  qrcode:{src:'lib/qrcode.min.js',ok:()=>window.QRCode}
+  pdfLib:{src:'/lib/pdf-lib.min.js',ok:()=>window.PDFLib},
+  pdfjs:{src:'/lib/pdf.min.js',ok:()=>window.pdfjsLib,
+         after(){window.pdfjsLib.GlobalWorkerOptions.workerSrc='/lib/pdf.worker.min.js';}},
+  jszip:{src:'/lib/jszip.min.js',ok:()=>window.JSZip},
+  qrcode:{src:'/lib/qrcode.min.js',ok:()=>window.QRCode}
 };
 const libCache={};
 function loadLib(name){
@@ -84,9 +84,14 @@ const homeView=$('#view-home'),toolView=$('#view-tool'),mount=$('#toolMount');
 const TOOLS={};
 let pendingFiles=null;   // files handed over from a global drop
 let activeIntake=null;   // {match, fn} registered by the open tool
-const homeActive=()=>homeView.classList.contains('is-active');
+const homeActive=()=>!!homeView&&homeView.classList.contains('is-active');
 
+const FIXED=document.body.dataset.tool||null;
 function route(){
+  if(FIXED){
+    if(TOOLS[FIXED]&&!mount.dataset.done){mount.dataset.done='1';mount.innerHTML='';TOOLS[FIXED].mount(mount,null);}
+    return;
+  }
   const m=location.hash.match(/^#\/([a-z-]+)$/);
   const id=m&&m[1];
   activeIntake=null;
@@ -115,6 +120,7 @@ $$('a[data-nav="home"]').forEach(a=>on(a,'click',e=>{e.preventDefault();location
 const cards=$$('#toolGrid .card'),gridEmpty=$('#gridEmpty'),searchInput=$('#searchInput');
 let activeCat='all';
 function filterCards(){
+  if(!searchInput||!gridEmpty)return;
   const q=searchInput.value.trim().toLowerCase();let vis=0;
   cards.forEach(c=>{
     const okCat=activeCat==='all'||c.dataset.cat===activeCat;
@@ -165,6 +171,7 @@ on(window,'drop',e=>{
 /* ================= drop chooser ================= */
 const chooser=$('#chooser'),chList=$('#chList'),chSub=$('#chSub');
 function openChooser(files){
+  if(!chooser)return;
   const pdfs=files.filter(isPdf),imgs=files.filter(isImg);
   if(!pdfs.length&&!imgs.length){toast('Drop PDF or image files (JPG, PNG, WebP).',true);return;}
   const total=files.reduce((s,f)=>s+f.size,0);

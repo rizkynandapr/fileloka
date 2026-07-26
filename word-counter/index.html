@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Word Counter — Words, Characters &amp; Reading Time | ToolDock</title>
+<meta name="description" content="Free live word counter: words, characters, sentences, paragraphs, unique words, reading and speaking time. Your text never leaves your browser.">
+<link rel="canonical" href="https://tooldock.example/word-counter/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ToolDock">
+<meta property="og:title" content="Word Counter — Words, Characters &amp; Reading Time | ToolDock">
+<meta property="og:description" content="Free live word counter: words, characters, sentences, paragraphs, unique words, reading and speaking time. Your text never leaves your browser.">
+<meta property="og:url" content="https://tooldock.example/word-counter/">
+<meta name="twitter:card" content="summary">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M3 9c0-2 1-3 3-3h7l3 3h10c2 0 3 1 3 3v12c0 2-1 3-3 3H6c-2 0-3-1-3-3z' fill='%232440E8'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@500;700;800&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "SoftwareApplication", "name": "Word counter — ToolDock", "url": "https://tooldock.example/word-counter/", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "description": "Free live word counter: words, characters, sentences, paragraphs, unique words, reading and speaking time. Your text never leaves your browser.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How is reading time calculated?", "acceptedAnswer": {"@type": "Answer", "text": "Reading time assumes about 220 words per minute (average adult silent reading); speaking time assumes about 130 wpm, a comfortable presentation pace. Both are estimates to plan against, not stopwatch guarantees."}}, {"@type": "Question", "name": "Does it work for character-limited platforms?", "acceptedAnswer": {"@type": "Answer", "text": "Yes — the character counts (with and without spaces) update live, so you can trim a bio, ad, or meta description to an exact limit as you type."}}, {"@type": "Question", "name": "What counts as a sentence or paragraph?", "acceptedAnswer": {"@type": "Answer", "text": "Sentences are split on ., ! and ? endings; paragraphs on blank lines. Text without ending punctuation still counts as one sentence rather than zero."}}, {"@type": "Question", "name": "Is my text saved or sent anywhere?", "acceptedAnswer": {"@type": "Answer", "text": "No. Counting happens in your browser as you type; nothing is transmitted or stored. Paste confidential drafts freely."}}]}]}</script>
+</head>
+<body data-tool="word-counter">
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="/" aria-label="ToolDock home">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 9c0-2 1-3 3-3h7l3 3h10c2 0 3 1 3 3v12c0 2-1 3-3 3H6c-2 0-3-1-3-3z" fill="var(--accent)"/><path d="M3 13h26" stroke="var(--bg)" stroke-width="1.6"/></svg>
+      <span class="brand-name">Tool<em>Dock</em></span>
+    </a>
+    <div class="topbar-actions">
+      <span class="privacy-pill" title="All tools run locally in your browser"><span class="dot"></span>0 files uploaded — ever</span>
+      <button class="icon-btn" id="themeBtn" aria-label="Switch color theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path id="themeIcon" d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+  <div class="tool-hero">
+    <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H7m5 5-5-5 5-5"/></svg>All tools</a>
+    <h1>Count words, characters and reading time</h1>
+    <p class="lead">Paste or type text and get live counts: words, characters (with and without spaces), sentences, paragraphs, unique words, plus estimated reading and speaking time — handy for essays, ads, and speeches.</p>
+  </div>
+  <section class="view is-active" id="view-tool">
+    <div id="toolMount"></div>
+  </section>
+  <aside class="ad-slot" aria-label="Advertisement placeholder">
+      <span>Advertisement</span>
+      <small>This single ad keeps every tool free.</small>
+    </aside>
+  <section class="section">
+    <h2>How it works</h2>
+    <ol class="howto">
+<li>Paste or type your text into the box.</li>
+<li>Counts update live as you edit — no button to press.</li>
+<li>Use reading time (~220 wpm) and speaking time (~130 wpm) to fit limits.</li>
+    </ol>
+  </section>
+  <section class="section faq">
+    <h2>Questions about this tool</h2>
+<details>
+  <summary>How is reading time calculated?</summary>
+  <p>Reading time assumes about 220 words per minute (average adult silent reading); speaking time assumes about 130 wpm, a comfortable presentation pace. Both are estimates to plan against, not stopwatch guarantees.</p>
+</details>
+<details>
+  <summary>Does it work for character-limited platforms?</summary>
+  <p>Yes — the character counts (with and without spaces) update live, so you can trim a bio, ad, or meta description to an exact limit as you type.</p>
+</details>
+<details>
+  <summary>What counts as a sentence or paragraph?</summary>
+  <p>Sentences are split on ., ! and ? endings; paragraphs on blank lines. Text without ending punctuation still counts as one sentence rather than zero.</p>
+</details>
+<details>
+  <summary>Is my text saved or sent anywhere?</summary>
+  <p>No. Counting happens in your browser as you type; nothing is transmitted or stored. Paste confidential drafts freely.</p>
+</details>
+  </section>
+  <section class="section">
+    <h2>Related tools</h2>
+    <div class="rel-links">
+<a class="rel-link" href="/password-generator/">Password generator</a>
+<a class="rel-link" href="/qr-code/">QR code maker</a>
+<a class="rel-link" href="/signature/">Signature maker</a>
+    </div>
+  </section>
+</main>
+<footer>
+  <div class="wrap foot-in">
+    <div>© 2026 ToolDock — every tool runs on your device.</div>
+    <nav>
+      <a href="/">All tools</a>
+      <a href="/#faq">FAQ</a>
+      <a href="/#privacy">Privacy</a>
+    </nav>
+  </div>
+</footer>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script src="/app.js" defer></script>
+</body>
+</html>
