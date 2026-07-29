@@ -50,6 +50,12 @@ function generatePassword(len, keys, avoid){
   for(let i=chars.length-1;i>0;i--){const j=randInt(i+1);const t=chars[i];chars[i]=chars[j];chars[j]=t;}
   return chars.slice(0,len).join('');
 }
+/* verbatim from app.js */
+const isHeic=f=>/^image\/hei[cf]/i.test(f.type||'')||/\.(heic|heif)$/i.test(f.name);
+function baseName(n){return n.replace(/\.[^.]+$/,'');}
+function heicOutName(file, frameIndex, frameCount, ext){
+  return frameCount>1 ? baseName(file.name)+'-'+frameIndex+'.'+ext : baseName(file.name)+'.'+ext;
+}
 function wordStats(t){
   const words=t.match(/\S+/g)||[];
   const sent=(t.match(/[^.!?\u2026]+[.!?\u2026]+/g)||[]).length;
@@ -163,6 +169,16 @@ const PNG_1x1 = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUl
   ok(st.uniq===8, 'unique words = 8 (punctuation stripped)');
   const empty = wordStats('');
   ok(empty.words===0&&empty.sent===0&&empty.para===0, 'empty text → all zeros');
+
+  console.log('\n== 9. HEIC detection & naming ==');
+  ok(isHeic({name:'IMG_4021.HEIC', type:''}), 'detects .HEIC when browser reports no MIME type');
+  ok(isHeic({name:'photo.heif', type:''}), '.heif recognised');
+  ok(isHeic({name:'noext', type:'image/heic'}), 'image/heic MIME recognised without extension');
+  ok(!isHeic({name:'photo.jpg', type:'image/jpeg'}) && !isHeic({name:'a.png',type:'image/png'}), 'plain JPG/PNG not treated as HEIC');
+  ok(!isHeic({name:'notes.heic.txt', type:'text/plain'}), 'file merely containing "heic" in the name is not matched');
+  ok(heicOutName({name:'IMG_4021.HEIC'},1,1,'jpg')==='IMG_4021.jpg', 'single-frame output keeps the original name');
+  ok(heicOutName({name:'IMG_4021.HEIC'},2,3,'jpg')==='IMG_4021-2.jpg', 'multi-frame output numbered per frame');
+  ok(heicOutName({name:'burst.heic'},1,1,'png')==='burst.png', 'PNG extension honoured');
 
   console.log('\n== 9. fmtBytes ==');
   ok(fmtBytes(0)==='0 B'&&fmtBytes(1024)==='1.0 KB'&&fmtBytes(1536)==='1.5 KB'&&fmtBytes(10*1024*1024)==='10 MB', 'byte formatting: 0 B / 1.0 KB / 1.5 KB / 10 MB');

@@ -94,14 +94,31 @@ P = {
           "Arrange the order and pick a page size: match each image, A4 portrait, or A4 landscape.",
           "Click Make PDF and download the finished document."],
    faqs=[("Can I combine photos from my phone into one PDF?",
-          "Yes — that's the main use. Select or drop all the photos, reorder them, and export a single PDF that's easy to email or archive. iPhone HEIC photos aren't supported yet; convert them to JPG first."),
+          "Yes — that's the main use. Select or drop all the photos, reorder them, and export a single PDF that's easy to email or archive. iPhone HEIC photos need one extra step: run them through the HEIC to JPG tool first, then bring the JPGs back here."),
          ("Which page size should I choose?",
           "'Match image' keeps every photo at its natural proportions — best for screenshots. A4 fits each image neatly onto a standard page — best for printing or official submissions."),
          ("Will my images be compressed?",
           "JPG images are embedded as-is with no quality loss. PNG and WebP are embedded losslessly too — the PDF simply wraps them."),
          ("Is this converter really private?",
           "Yes. The PDF is assembled in your browser's memory using pdf-lib. Your photos are never transmitted, stored, or seen by anyone.")],
-   related=["pdf-to-jpg","compress-image","merge-pdf"]),
+   related=["heic-to-jpg","compress-image","pdf-to-jpg"]),
+ "heic-to-jpg": dict(
+   title="HEIC to JPG Converter Online Free — iPhone Photos, No Upload | Fileloka",
+   h1="Convert HEIC (iPhone photos) to JPG",
+   lead="iPhone saves photos as HEIC, which Windows, older apps and many upload forms simply refuse to open. This converts them to ordinary JPG — decoded right on your device, so your photos are never uploaded to anyone's server.",
+   meta="Convert iPhone HEIC photos to JPG free, without uploading. Batch conversion, quality control, decoded locally in your browser.",
+   steps=["Choose or drop your .heic or .heif photos — several at once is fine.",
+          "Pick JPG (opens everywhere) or PNG, and set the quality.",
+          "Convert and download each photo, or all of them as a ZIP."],
+   faqs=[("Why can't I open HEIC files on Windows?",
+          "HEIC is Apple's format. Windows and many websites either need an extra codec or reject the file outright. Converting to JPG solves it permanently, since JPG opens on every device and is accepted by every upload form."),
+         ("Can I convert many iPhone photos at once?",
+          "Yes — select or drop as many as you like and they're converted one after another, with progress shown. Because your own device does the work, there's no queue and no upload wait."),
+         ("Will converting to JPG lose quality?",
+          "JPG is lossy, so there is a small quality cost, but at the default 88% it is not visible in normal viewing or printing. Choose PNG instead if you need a pixel-exact copy, though the file will be much larger."),
+         ("How can HEIC be decoded without a server?",
+          "The page loads libheif, an open-source decoder compiled to JavaScript (about 0.5 MB, once). Your browser then decodes the photo itself. That is why the tool keeps working even if you go offline after the page has loaded.")],
+   related=["compress-image","jpg-to-pdf","convert-image"]),
  "compress-image": dict(
    title="Compress Images Online Free — JPG, PNG, WebP, No Upload | Fileloka",
    h1="Compress images without losing what matters",
@@ -118,7 +135,7 @@ P = {
           "PNG is lossless, so the quality slider doesn't apply. Use the max-width option to shrink its dimensions, or convert it to JPG/WebP for dramatic savings."),
          ("Are my photos uploaded for compression?",
           "No — compression runs on your device using your browser's own image engine. Nothing is transmitted, which also makes it fast: there's no upload wait at all.")],
-   related=["resize-image","convert-image","jpg-to-pdf"]),
+   related=["heic-to-jpg","resize-image","convert-image"]),
  "resize-image": dict(
    title="Resize Images Online Free — Exact Pixels or Percent, No Upload | Fileloka",
    h1="Resize images to exact pixels or a percentage",
@@ -393,10 +410,10 @@ def build_id_home(chrome, cards):
 <link rel="stylesheet" href="/styles.css">
 <script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>
 </head>
-<body data-tool="none">
+<body>
 {topbar_for(chrome['topbar'], 'id', '/')}
 <main>
-<section class="view is-active">
+<section class="view is-active" id="view-home">
   <div class="wrap">
     <div class="hero">
       <h1 class="rise">{H["h1"]}</h1>
@@ -423,8 +440,7 @@ def build_id_home(chrome, cards):
     </div>
     <p class="grid-empty" id="gridEmpty">{html.escape(H["grid_empty"])}</p>
   </div>
-</section>
-<div class="wrap">
+  <div class="wrap">
   {chrome['ad']}
   <section class="section">
     <h2>{html.escape(H["why_h"])}</h2>
@@ -439,7 +455,15 @@ def build_id_home(chrome, cards):
     <p>{priv0}</p>
     <p>{priv1}</p>
   </section>
-</div>
+  </div>
+</section>
+<section class="view" id="view-tool">
+  <div class="wrap">
+    <button class="back" id="backBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H7m5 5-5-5 5-5"/></svg>Semua alat</button>
+    <div id="toolMount"></div>
+  {chrome['ad']}
+  </div>
+</section>
 </main>
 {footer}
 <div class="toasts" id="toasts" aria-live="polite"></div>

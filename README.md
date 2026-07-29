@@ -20,7 +20,7 @@ Decision inputs, gathered before building (July 2026):
 
 Sources: Similarweb, Semrush, Ahrefs-style trackers for ilovepdf.com; iLovePDF case studies (marketingcrafted.com, lettersbydavey.com); competitor tool pages (Smallpdf, Adobe, PDF24, FreeConvert).
 
-### The 12 launch tools
+### The 13 tools
 | # | Tool | Demand rationale |
 |---|------|------------------|
 | 1 | Merge PDF | #1 PDF task worldwide |
@@ -35,8 +35,9 @@ Sources: Similarweb, Semrush, Ahrefs-style trackers for ilovepdf.com; iLovePDF c
 | 10 | Password generator | Evergreen utility |
 | 11 | Word counter | Students/writers, evergreen |
 | 12 | Signature maker | Pairs naturally with the PDF workflow |
+| 13 | HEIC to JPG | iPhone photos Windows and upload forms reject — high, growing search volume |
 
-Deliberately **excluded from v1** (need a server or heavy WASM): PDF↔Word/Excel, OCR, HEIC input, PDF unlock. They're on the roadmap (§7) as the premium/differentiation layer.
+Deliberately **excluded** (need a server or heavy WASM): PDF↔Word/Excel, OCR, PDF unlock. HEIC shipped in v1.1 once a CSP-safe decoder was found (see SECURITY.md §2.1b). They're on the roadmap (§7) as the premium/differentiation layer.
 
 ---
 
@@ -48,6 +49,7 @@ Deliberately **excluded from v1** (need a server or heavy WASM): PDF↔Word/Exce
   - `pdf.js@3.11.174` — render PDF pages (compress-strong, PDF→JPG)
   - `jszip@3.10.1` — multi-file downloads
   - `qrcodejs@1.0.0` — QR codes
+  - `libheif-js@1.18.2` (asm.js) — decode HEIC/HEIF
   - Image tools use the native Canvas API — no library.
 - **Signature UX features:** drop a file *anywhere* on the page and Fileloka suggests matching tools; hash routing (`#/merge-pdf`) makes every tool linkable; dark mode; `/` to search; keyboard + reduced-motion + focus-visible accessibility.
 - No `localStorage`/`sessionStorage`, no cookies, no analytics, no external requests besides cdnjs + Google Fonts.
@@ -132,7 +134,7 @@ Then: custom domain → replace contact email → add SRI hashes → submit site
 ## 7. Roadmap
 1. ~~**SEO split**~~ — **shipped**: every tool now has its own indexable page (`/merge-pdf/`, `/split-pdf/`, …) with unique title, intro, FAQ + FAQPage/SoftwareApplication schema, plus `sitemap.xml` and `robots.txt`. Regenerate after copy edits with `python scripts/generate_tool_pages.py`.
 2. PWA (manifest + service worker) → true offline + "install app" on mobile.
-3. HEIC input (iPhone photos — very high search volume) via `heic2any`/WASM.
+3. ~~HEIC input~~ — **shipped** via the `libheif-js` asm.js build (no CSP relaxation needed).
 4. OCR (Tesseract WASM), PDF↔Word server-side → the Pro tier.
 5. ~~i18n Bahasa Indonesia~~ — **shipped**: full `/id/` mirror (12 tool pages + home) with bidirectional hreflang, language switcher, Indonesian search-intent copy. Next locales: ES/PT. (Tool widget UI strings remain English for now — on the roadmap.)
 

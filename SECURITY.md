@@ -35,10 +35,23 @@ Provenance record (SHA-256 — simpan; cocokkan lagi kapan pun curiga):
 5b5799e6f8c680663207ac5b42ee14eed2a406fa7af48f50c154f0c0b1566946  lib/pdf.min.js          (pdfjs-dist@3.11.174, npm)
 feabdf309770ed24bba31a5467836cdc8cf639c705af27d52b585b041bb8527b  lib/pdf.worker.min.js   (pdfjs-dist@3.11.174, npm)
 acc7e41455a80765b5fd9c7ee1b8078a6d160bbbca455aeae854de65c947d59e  lib/jszip.min.js        (jszip@3.10.1, npm)
+e237c8e44716b82102228b69c8cd75ac06ea256f725708d941caab402e7d1ae1  lib/libheif.js          (libheif-js@1.18.2 asm.js build, npm — LGPL-3.0)
 c541ef06327885a8415bca8df6071e14189b4855336def4f36db54bde8484f36  lib/qrcode.min.js       (davidshimjs/qrcodejs@master, GitHub)
 ```
 
 Verifikasi kapan saja: `sha256sum lib/*.js` dan bandingkan dengan tabel di atas.
+
+### 2.1b Catatan HEIC: kenapa build asm.js, bukan WASM
+
+Menambah HEIC→JPG berarti memuat decoder `libheif`. Dua kandidat diperiksa dulu terhadap CSP kita:
+
+| Kandidat | Butuh pelonggaran CSP? | Ukuran (gzip) | Putusan |
+|---|---|---|---|
+| `heic2any` | **Ya** — memakai `new Function` (glue Emscripten embind) → butuh `'unsafe-eval'` | 0,3 MB | ditolak |
+| `libheif-js` build WASM | Ya — butuh `'wasm-unsafe-eval'` | 0,4 MB | ditolak (masih pelonggaran) |
+| **`libheif-js` build asm.js** | **Tidak** — nol `new Function`, nol `eval`, nol WebAssembly | 0,45 MB | **dipakai** |
+
+Konsekuensinya: fitur HEIC masuk **tanpa satu pun perubahan pada CSP** — `script-src 'self'` tetap tanpa `'unsafe-inline'` maupun `'unsafe-eval'`. Biayanya dekode sedikit lebih lambat daripada WASM dan berkas ~50 KB lebih besar; itu pertukaran yang diambil sadar demi menjaga postur keamanan tetap utuh. Decoder ini di-*lazy load* — pengunjung yang tidak memakai alat HEIC tidak mengunduhnya sama sekali.
 
 ### 2.2 XSS: dua lapis
 1. **Escape di sumber** — semua string yang bisa dikontrol user (terutama nama file) melewati `esc()` sebelum masuk `innerHTML`, atau di-set via `textContent` (toast, progress label). Sudah diaudit per titik insersi.
