@@ -4,52 +4,58 @@
    manila folder tabs. Type: Gabarito / Public Sans / Plex Mono.
    ============================================================ */
 :root{
-  --bg:#F3F5F4;            /* porcelain */
-  --surface:#FFFFFF;
-  --surface-2:#FAFBFA;
-  --ink:#12151A;
-  --muted:#5B6572;
-  --line:#E2E6E4;
-  --line-strong:#C9D0CD;
-  --accent:#2440E8;        /* cobalt ink */
-  --accent-press:#1B33C4;
-  --accent-soft:#E9ECFD;
+  /* "Kertas & Pinus" — dipilih agar nyaman dipandang lama:
+     tanpa putih murni (silau), tanpa hitam murni (kontras melelahkan),
+     aksen chroma rendah supaya tidak "bergetar" di latar terang. */
+  --bg:#EDF1F4;            /* kertas kabut — biru-abu lembut */
+  --surface:#FBFCFD;       /* nyaris putih, bukan #FFF */
+  --surface-2:#F4F7F9;
+  --ink:#1C2632;           /* slate pekat, bukan hitam */
+  --muted:#526271;
+  --line:#DCE4EA;
+  --line-strong:#C1CDD7;
+  --accent:#0B6E5F;        /* pinus — tenang, kontras aman */
+  --accent-press:#095A4E;
+  --accent-soft:#DDEFEA;
   --on-accent:#FFFFFF;
-  --tan:#F0E4C3;           /* manila folder */
-  --tan-ink:#6E5B1F;
-  --ok:#1E7A55;
-  --ok-soft:#E4F3EC;
-  --warn:#9A6B15;
-  --warn-soft:#FBF0DA;
-  --danger:#C2402A;
-  --shadow-1:0 1px 2px rgba(18,21,26,.05), 0 6px 20px rgba(18,21,26,.06);
-  --shadow-2:0 2px 4px rgba(18,21,26,.06), 0 14px 34px rgba(18,21,26,.10);
-  --r-s:8px; --r-m:12px; --r-l:16px;
+  --tan:#F6E3C4;           /* map berkas, kini apricot hangat */
+  --tan-ink:#7A5A1E;
+  --ok:#17715A;
+  --ok-soft:#DEF0E8;
+  --warn:#8A6414;
+  --warn-soft:#FAEFD8;
+  --danger:#B23D2B;
+  --shadow-1:0 1px 2px rgba(28,38,50,.04), 0 6px 18px rgba(28,38,50,.05);
+  --shadow-2:0 2px 6px rgba(28,38,50,.05), 0 16px 36px rgba(28,38,50,.09);
+  --focus:0 0 0 3px var(--bg), 0 0 0 5px var(--accent);
+  --r-s:9px; --r-m:13px; --r-l:18px;
+  --tap:44px;
   --font-display:"Gabarito", system-ui, sans-serif;
   --font-body:"Public Sans", system-ui, -apple-system, sans-serif;
   --font-mono:"IBM Plex Mono", ui-monospace, "SF Mono", monospace;
 }
 [data-theme="dark"]{
-  --bg:#0F1216;
-  --surface:#171B21;
-  --surface-2:#1C2128;
-  --ink:#ECEFF2;
-  --muted:#96A0AC;
-  --line:#272D36;
-  --line-strong:#39414D;
-  --accent:#7386FF;
-  --accent-press:#5A6FF2;
-  --accent-soft:#232A4A;
-  --on-accent:#0E1116;
-  --tan:#2B2716;
-  --tan-ink:#D3BC6C;
-  --ok:#4CC08E;
-  --ok-soft:#15271F;
-  --warn:#E0AE55;
+  --bg:#12171C;            /* arang lembut, bukan hitam murni */
+  --surface:#191F26;
+  --surface-2:#1F262E;
+  --ink:#E4E9ED;           /* bukan putih murni — mengurangi halo */
+  --muted:#9AA7B3;
+  --line:#2A333C;
+  --line-strong:#3B4753;
+  --accent:#4ECFB8;
+  --accent-press:#3BB8A2;
+  --accent-soft:#123330;
+  --on-accent:#08201C;
+  --tan:#2C2617;
+  --tan-ink:#E0C482;
+  --ok:#54C79E;
+  --ok-soft:#122A22;
+  --warn:#DFAF5E;
   --warn-soft:#2A2313;
-  --danger:#EF7C64;
-  --shadow-1:0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35);
-  --shadow-2:0 2px 4px rgba(0,0,0,.45), 0 14px 34px rgba(0,0,0,.5);
+  --danger:#EE8570;
+  --shadow-1:0 1px 2px rgba(0,0,0,.34), 0 6px 18px rgba(0,0,0,.3);
+  --shadow-2:0 2px 6px rgba(0,0,0,.4), 0 16px 36px rgba(0,0,0,.45);
+  --focus:0 0 0 3px var(--bg), 0 0 0 5px var(--accent);
 }
 
 *{box-sizing:border-box}
@@ -351,11 +357,132 @@ footer{border-top:1px solid var(--line); margin-top:50px; padding:30px 0 42px; c
 .tool-hero h1{font-family:var(--font-display);font-weight:800;font-size:clamp(1.7rem,4vw,2.5rem);letter-spacing:-.02em;line-height:1.12;margin:14px 0 12px}
 .tool-hero .lead{max-width:64ch;color:var(--muted);font-size:1.04rem;margin:0 0 8px}
 .howto{margin:0;padding-left:22px;max-width:64ch}
-.howto li{margin:0 0 10px;color:var(--fg)}
+.howto li{margin:0 0 10px;color:var(--ink)}
 .rel-links{display:flex;flex-wrap:wrap;gap:10px}
-.rel-link{display:inline-flex;align-items:center;padding:10px 16px;border:1.5px solid var(--line);border-radius:999px;font-weight:600;font-size:.95rem;color:var(--fg);text-decoration:none;background:var(--card)}
+.rel-link{display:inline-flex;align-items:center;padding:10px 16px;border:1.5px solid var(--line);border-radius:999px;font-weight:600;font-size:.95rem;color:var(--ink);text-decoration:none;background:var(--surface)}
 .rel-link:hover{border-color:var(--accent);color:var(--accent)}
 body[data-tool] main.wrap{padding-top:8px}
 
 .lang-link{display:inline-flex;align-items:center;padding:6px 11px;margin-right:10px;border:1.5px solid var(--line);border-radius:999px;font-weight:700;font-size:.72rem;letter-spacing:.06em;color:var(--muted);text-decoration:none}
 .lang-link:hover{color:var(--accent);border-color:var(--accent)}
+
+/* ============================================================
+   Lapisan kenyamanan — ditambahkan setelah token supaya menang
+   di cascade tanpa mengubah satu pun nama class (app.js aman).
+   Fokus: keterbacaan, target sentuh, fokus keyboard, motion.
+   ============================================================ */
+
+/* — Kenyamanan baca — */
+body{
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+.section p, .why p, .faq details p, .howto li{
+  max-width:68ch;          /* baris terlalu panjang melelahkan mata */
+  line-height:1.7;
+}
+.tool-hero .lead{line-height:1.65}
+h1,h2,h3,.brand-name{letter-spacing:-.018em}
+
+/* Anchor (#faq, #privacy) tidak lagi tersembunyi di balik topbar */
+[id]{scroll-margin-top:88px}
+html{scroll-behavior:smooth}
+
+/* — Fokus keyboard terlihat jelas di semua kontrol — */
+a:focus-visible, button:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible, summary:focus-visible,
+.card:focus-visible, .rel-link:focus-visible, .tab:focus-visible{
+  outline:none;
+  box-shadow:var(--focus);
+  border-radius:var(--r-s);
+}
+
+/* — Target sentuh nyaman (pedoman 44px) — */
+.btn{min-height:var(--tap); padding-inline:20px}
+.btn-sm{min-height:38px}
+.tab{min-height:40px}
+.mini-btn{min-width:38px; min-height:38px}
+.check, .radio-pill{min-height:40px}
+.search input{min-height:52px}
+@media (max-width:600px){
+  .btn{width:100%; justify-content:center}
+  .actions{flex-direction:column; align-items:stretch}
+  .mini-btn{min-width:var(--tap); min-height:var(--tap)}
+  .radio-pill, .check{min-height:var(--tap)}
+  /* 16px mencegah iOS auto-zoom saat mengetik */
+  input, select, textarea{font-size:16px}
+}
+
+/* — Topbar menempel & tembus pandang: navigasi selalu terjangkau — */
+.topbar{
+  position:sticky; top:0; z-index:40;
+  background:color-mix(in srgb, var(--bg) 86%, transparent);
+  backdrop-filter:saturate(140%) blur(10px);
+  -webkit-backdrop-filter:saturate(140%) blur(10px);
+  border-bottom:1px solid var(--line);
+}
+@supports not (backdrop-filter:blur(4px)){ .topbar{background:var(--bg)} }
+
+/* — Pil privasi: klaim inti produk, satu-satunya aksen di topbar — */
+.privacy-pill{
+  background:var(--accent-soft);
+  color:var(--accent);
+  border-color:transparent;
+  font-weight:650;
+}
+
+/* — Kartu alat: angkat lembut, tab map lebih halus — */
+.card{
+  background:var(--surface);
+  border-radius:var(--r-l);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.card:hover{
+  transform:translateY(-3px);
+  box-shadow:var(--shadow-2);
+  border-color:var(--accent);
+}
+.card::before{
+  background:var(--tan);
+  color:var(--tan-ink);
+  letter-spacing:.06em;
+}
+.card:hover::before{background:var(--accent-soft); color:var(--accent)}
+.card .ic{background:var(--surface-2); border-radius:var(--r-m)}
+.card:hover .ic{background:var(--accent-soft); color:var(--accent)}
+
+/* — Tombol: bentuk lebih ramah, tekanan terasa — */
+.btn{border-radius:999px; transition:transform .12s ease, background .16s ease, box-shadow .16s ease}
+.btn-primary{box-shadow:var(--shadow-1)}
+.btn-primary:hover{box-shadow:var(--shadow-2)}
+.btn:active{transform:translateY(1px)}
+.btn-primary:disabled{opacity:.5; box-shadow:none; cursor:not-allowed}
+
+/* — Area jatuhkan berkas: undangan yang jelas — */
+.dz{border-radius:var(--r-l); border-width:2px; transition:border-color .16s ease, background .16s ease}
+.dz:hover{border-color:var(--accent); background:var(--surface-2)}
+.dz.drag{border-color:var(--accent); background:var(--accent-soft)}
+.dz .dz-ic{color:var(--accent)}
+
+/* — Kontrol lain — */
+.field input[type="text"], .field textarea, select, input[type="number"]{
+  border-radius:var(--r-m); background:var(--surface); color:var(--ink);
+}
+.radio-pill:has(input:checked){background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+.rel-link{border-radius:999px; transition:border-color .16s ease, color .16s ease, background .16s ease}
+.rel-link:hover{background:var(--accent-soft)}
+.faq summary{padding-block:16px; line-height:1.5}
+.result{border-radius:var(--r-l)}
+.badge{border-radius:999px}
+
+/* — Hormati preferensi gerak minimal — */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+  .card:hover{transform:none}
+}
