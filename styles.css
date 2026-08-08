@@ -4,57 +4,57 @@
    manila folder tabs. Type: Gabarito / Public Sans / Plex Mono.
    ============================================================ */
 :root{
-  /* "Kertas & Pinus" — dipilih agar nyaman dipandang lama:
-     tanpa putih murni (silau), tanpa hitam murni (kontras melelahkan),
-     aksen chroma rendah supaya tidak "bergetar" di latar terang. */
-  --bg:#EDF1F4;            /* kertas kabut — biru-abu lembut */
-  --surface:#FBFCFD;       /* nyaris putih, bukan #FFF */
-  --surface-2:#F4F7F9;
-  --ink:#1C2632;           /* slate pekat, bukan hitam */
-  --muted:#526271;
-  --line:#DCE4EA;
-  --line-strong:#C1CDD7;
-  --accent:#0B6E5F;        /* pinus — tenang, kontras aman */
-  --accent-press:#095A4E;
-  --accent-soft:#DDEFEA;
-  --on-accent:#FFFFFF;
-  --tan:#F6E3C4;           /* map berkas, kini apricot hangat */
-  --tan-ink:#7A5A1E;
-  --ok:#17715A;
-  --ok-soft:#DEF0E8;
+  /* "Arsip" — kosakata visualnya dari dunia berkas: kertas HVS,
+     map manila, tinta pulpen, stempel. Bukan kartu-melayang SaaS.
+     Tetap ramah mata: tanpa putih murni, tanpa hitam murni, chroma rendah. */
+  --bg:#F1F0EC;            /* kertas HVS — netral, bukan krem */
+  --surface:#FAFAF7;
+  --surface-2:#F3F3EE;
+  --ink:#1A1F26;           /* tinta pekat, bukan hitam */
+  --muted:#5A6169;
+  --line:#D8D6CD;
+  --line-strong:#B4B1A5;
+  --accent:#1E4463;        /* biru tinta pulpen — tenang, bukan teal startup */
+  --accent-press:#15334B;
+  --accent-soft:#E1E8EF;
+  --on-accent:#FBFBF8;
+  --tan:#E9DAB2;           /* map manila */
+  --tan-ink:#6B5518;
+  --ok:#1B6B4F;
+  --ok-soft:#DFEDE6;
   --warn:#8A6414;
-  --warn-soft:#FAEFD8;
-  --danger:#B23D2B;
-  --shadow-1:0 1px 2px rgba(28,38,50,.04), 0 6px 18px rgba(28,38,50,.05);
-  --shadow-2:0 2px 6px rgba(28,38,50,.05), 0 16px 36px rgba(28,38,50,.09);
+  --warn-soft:#F7EED8;
+  --danger:#A63A28;
+  --shadow-1:none;
+  --shadow-2:none;
   --focus:0 0 0 3px var(--bg), 0 0 0 5px var(--accent);
-  --r-s:9px; --r-m:13px; --r-l:18px;
+  --r-s:3px; --r-m:4px; --r-l:5px;
   --tap:44px;
   --font-display:"Gabarito", system-ui, sans-serif;
   --font-body:"Public Sans", system-ui, -apple-system, sans-serif;
   --font-mono:"IBM Plex Mono", ui-monospace, "SF Mono", monospace;
 }
 [data-theme="dark"]{
-  --bg:#12171C;            /* arang lembut, bukan hitam murni */
-  --surface:#191F26;
-  --surface-2:#1F262E;
-  --ink:#E4E9ED;           /* bukan putih murni — mengurangi halo */
-  --muted:#9AA7B3;
-  --line:#2A333C;
-  --line-strong:#3B4753;
-  --accent:#4ECFB8;
-  --accent-press:#3BB8A2;
-  --accent-soft:#123330;
-  --on-accent:#08201C;
-  --tan:#2C2617;
-  --tan-ink:#E0C482;
-  --ok:#54C79E;
-  --ok-soft:#122A22;
-  --warn:#DFAF5E;
-  --warn-soft:#2A2313;
-  --danger:#EE8570;
-  --shadow-1:0 1px 2px rgba(0,0,0,.34), 0 6px 18px rgba(0,0,0,.3);
-  --shadow-2:0 2px 6px rgba(0,0,0,.4), 0 16px 36px rgba(0,0,0,.45);
+  --bg:#14161A;            /* arang lembut, bukan hitam murni */
+  --surface:#1B1E23;
+  --surface-2:#22262C;
+  --ink:#E6E7E3;           /* bukan putih murni */
+  --muted:#9DA3AB;
+  --line:#2E323A;
+  --line-strong:#454B55;
+  --accent:#8FB6DA;        /* tinta pulpen di kertas gelap */
+  --accent-press:#A8C7E4;
+  --accent-soft:#1C2A38;
+  --on-accent:#10161C;
+  --tan:#2E2819;
+  --tan-ink:#D8C083;
+  --ok:#59BE96;
+  --ok-soft:#152A22;
+  --warn:#DCAB5C;
+  --warn-soft:#2A2314;
+  --danger:#E58671;
+  --shadow-1:none;
+  --shadow-2:none;
   --focus:0 0 0 3px var(--bg), 0 0 0 5px var(--accent);
 }
 
@@ -486,3 +486,99 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible,
   }
   .card:hover{transform:none}
 }
+
+/* ============================================================
+   REGISTER "ARSIP" — membuang ciri tampilan generatif:
+   bantal membulat, bayangan lembut, kartu melayang, tombol pil.
+   Diganti kosakata dunia berkas: kertas, map manila, tinta, stempel.
+   Semua capaian kenyamanan mata & sentuh di atas tetap berlaku.
+   ============================================================ */
+
+/* — Tepi tegas, bukan bantal. Kedalaman dari garis, bukan blur. — */
+.card, .btn, .dz, .result, .rel-link, .badge, .radio-pill, .check,
+.field input[type="text"], .field textarea, select, input[type="number"],
+.search input, .chooser .ch-card, .toast, .ad-slot, .prog, .flist li,
+.tab, .mini-btn, .pw-out, .qr-out .qr-frame, .sig-wrap{
+  border-radius:var(--r-m);
+  box-shadow:none;
+}
+.btn{border-radius:var(--r-m)}
+.card{box-shadow:none}
+
+/* — Suara struktural pindah ke mono: label map, laci, data — */
+.card::before, .tab, .badge, .flist .fmeta, .result .rstats,
+.search kbd, .ad-slot small, .drop-hint, .stat span, .fineprint{
+  font-family:var(--font-mono);
+  font-weight:500;
+  letter-spacing:.04em;
+}
+.card::before, .tab, .stat span{text-transform:uppercase; font-size:.66rem}
+.tab{padding-inline:14px}
+
+/* — Kartu = lembar arsip. Hover: map manila menyembul di baliknya. — */
+.card{
+  background:var(--surface);
+  border:1.5px solid var(--line-strong);
+  transition:border-color .14s ease, box-shadow .14s ease, transform .14s ease;
+}
+.card:hover{
+  transform:none;
+  border-color:var(--ink);
+  box-shadow:5px 5px 0 var(--tan), 5px 5px 0 1.5px var(--ink);
+}
+.card::before{
+  background:var(--tan);
+  color:var(--tan-ink);
+  border:1.5px solid var(--line-strong);
+  border-bottom:none;
+}
+.card:hover::before{border-color:var(--ink); background:var(--tan)}
+.card .ic{background:transparent; border:1.5px solid var(--line); border-radius:var(--r-s)}
+.card:hover .ic{border-color:var(--ink); background:var(--surface-2); color:var(--ink)}
+
+/* — Stempel: satu-satunya aksesori berani, dan ia menyatakan klaim inti — */
+.privacy-pill{
+  font-family:var(--font-mono);
+  text-transform:uppercase;
+  font-size:.62rem;
+  letter-spacing:.1em;
+  font-weight:600;
+  color:var(--accent);
+  background:transparent;
+  border:2px solid var(--accent);
+  border-radius:2px;
+  padding:6px 10px;
+  transform:rotate(-1.4deg);
+  box-shadow:inset 0 0 0 1px var(--bg), inset 0 0 0 2.5px var(--accent);
+  opacity:.92;
+}
+
+/* — Tombol: cap tinta, bukan pil karet — */
+.btn-primary{border:1.5px solid var(--accent-press)}
+.btn-ghost{border:1.5px solid var(--line-strong)}
+.btn-ghost:hover{border-color:var(--ink); background:var(--surface-2)}
+.btn:active{transform:translate(1px,1px)}
+
+/* — Area jatuhkan berkas: bidang isian, garis putus seperti formulir — */
+.dz{border:2px dashed var(--line-strong); background:var(--surface-2)}
+.dz:hover, .dz.drag{border-color:var(--accent); background:var(--accent-soft)}
+
+/* — Daftar berkas & hasil: baris buku besar — */
+.flist li{border:1.5px solid var(--line); border-radius:var(--r-s)}
+.result{border:1.5px solid var(--line-strong); background:var(--surface)}
+
+/* — Judul bagian ditopang aturan garis, bukan dekorasi — */
+.section h2, .why h3{padding-bottom:10px; border-bottom:1.5px solid var(--line-strong)}
+.section h2{display:inline-block; padding-right:28px}
+
+/* — Daftar bukti dibaca seperti ceklis formulir — */
+.proof li{
+  font-family:var(--font-mono);
+  font-size:.72rem;
+  letter-spacing:.01em;
+  text-transform:none;
+}
+.proof li svg{color:var(--accent)}
+
+/* — Sudut yang sengaja tetap membulat hanya di ikon kecil — */
+.card .go svg, .btn svg{border-radius:0}
