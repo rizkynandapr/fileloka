@@ -1,115 +1,283 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://fileloka.id/</loc>
-    <lastmod>2026-07-26</lastmod>
-  </url>
-  <url>
-    <loc>https://fileloka.id/id/</loc>
-    <lastmod>2026-07-26</lastmod>
-  </url>
-  <url>
-    <loc>https://fileloka.id/merge-pdf/</loc>
-    <lastmod>2026-07-26</lastmod>
-  </url>
-  <url>
-    <loc>https://fileloka.id/split-pdf/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/"/>
   </url>
   <url>
     <loc>https://fileloka.id/compress-pdf/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/compress-pdf/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/compress-pdf/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/compress-pdf/"/>
+  </url>
+  <url>
+    <loc>https://fileloka.id/merge-pdf/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/merge-pdf/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/merge-pdf/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/merge-pdf/"/>
+  </url>
+  <url>
+    <loc>https://fileloka.id/split-pdf/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/split-pdf/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/split-pdf/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/split-pdf/"/>
   </url>
   <url>
     <loc>https://fileloka.id/pdf-to-jpg/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/pdf-to-jpg/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/pdf-to-jpg/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/pdf-to-jpg/"/>
   </url>
   <url>
     <loc>https://fileloka.id/jpg-to-pdf/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/jpg-to-pdf/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/jpg-to-pdf/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/jpg-to-pdf/"/>
   </url>
   <url>
     <loc>https://fileloka.id/heic-to-jpg/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/heic-to-jpg/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/heic-to-jpg/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/heic-to-jpg/"/>
   </url>
   <url>
     <loc>https://fileloka.id/compress-image/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/compress-image/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/compress-image/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/compress-image/"/>
   </url>
   <url>
     <loc>https://fileloka.id/resize-image/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/resize-image/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/resize-image/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/resize-image/"/>
   </url>
   <url>
     <loc>https://fileloka.id/convert-image/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/convert-image/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/convert-image/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/convert-image/"/>
   </url>
   <url>
     <loc>https://fileloka.id/qr-code/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/qr-code/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/qr-code/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/qr-code/"/>
   </url>
   <url>
     <loc>https://fileloka.id/password-generator/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/password-generator/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/password-generator/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/password-generator/"/>
   </url>
   <url>
     <loc>https://fileloka.id/word-counter/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/word-counter/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/word-counter/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/word-counter/"/>
   </url>
   <url>
     <loc>https://fileloka.id/signature/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/signature/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/signature/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/signature/"/>
   </url>
   <url>
-    <loc>https://fileloka.id/id/merge-pdf/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <loc>https://fileloka.id/compress-pdf-to-100kb/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/compress-pdf-to-100kb/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/kompres-pdf-100kb/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/compress-pdf-to-100kb/"/>
   </url>
   <url>
-    <loc>https://fileloka.id/id/split-pdf/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <loc>https://fileloka.id/compress-pdf-to-200kb/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/compress-pdf-to-200kb/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/kompres-pdf-200kb/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/compress-pdf-to-200kb/"/>
+  </url>
+  <url>
+    <loc>https://fileloka.id/compress-pdf-to-300kb/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/compress-pdf-to-300kb/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/kompres-pdf-300kb/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/compress-pdf-to-300kb/"/>
+  </url>
+  <url>
+    <loc>https://fileloka.id/compress-pdf-to-500kb/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/compress-pdf-to-500kb/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/kompres-pdf-500kb/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/compress-pdf-to-500kb/"/>
+  </url>
+  <url>
+    <loc>https://fileloka.id/compress-pdf-to-1mb/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/compress-pdf-to-1mb/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/kompres-pdf-1mb/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/compress-pdf-to-1mb/"/>
+  </url>
+  <url>
+    <loc>https://fileloka.id/compress-pdf-to-2mb/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/compress-pdf-to-2mb/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/kompres-pdf-2mb/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/compress-pdf-to-2mb/"/>
+  </url>
+  <url>
+    <loc>https://fileloka.id/id/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/"/>
   </url>
   <url>
     <loc>https://fileloka.id/id/compress-pdf/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/compress-pdf/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/compress-pdf/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/compress-pdf/"/>
+  </url>
+  <url>
+    <loc>https://fileloka.id/id/merge-pdf/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/merge-pdf/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/merge-pdf/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/merge-pdf/"/>
+  </url>
+  <url>
+    <loc>https://fileloka.id/id/split-pdf/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/split-pdf/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/split-pdf/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/split-pdf/"/>
   </url>
   <url>
     <loc>https://fileloka.id/id/pdf-to-jpg/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/pdf-to-jpg/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/pdf-to-jpg/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/pdf-to-jpg/"/>
   </url>
   <url>
     <loc>https://fileloka.id/id/jpg-to-pdf/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/jpg-to-pdf/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/jpg-to-pdf/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/jpg-to-pdf/"/>
   </url>
   <url>
     <loc>https://fileloka.id/id/heic-to-jpg/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/heic-to-jpg/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/heic-to-jpg/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/heic-to-jpg/"/>
   </url>
   <url>
     <loc>https://fileloka.id/id/compress-image/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/compress-image/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/compress-image/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/compress-image/"/>
   </url>
   <url>
     <loc>https://fileloka.id/id/resize-image/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/resize-image/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/resize-image/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/resize-image/"/>
   </url>
   <url>
     <loc>https://fileloka.id/id/convert-image/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/convert-image/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/convert-image/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/convert-image/"/>
   </url>
   <url>
     <loc>https://fileloka.id/id/qr-code/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/qr-code/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/qr-code/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/qr-code/"/>
   </url>
   <url>
     <loc>https://fileloka.id/id/password-generator/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/password-generator/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/password-generator/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/password-generator/"/>
   </url>
   <url>
     <loc>https://fileloka.id/id/word-counter/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/word-counter/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/word-counter/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/word-counter/"/>
   </url>
   <url>
     <loc>https://fileloka.id/id/signature/</loc>
-    <lastmod>2026-07-26</lastmod>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/signature/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/signature/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/signature/"/>
+  </url>
+  <url>
+    <loc>https://fileloka.id/id/kompres-pdf-100kb/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/compress-pdf-to-100kb/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/kompres-pdf-100kb/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/compress-pdf-to-100kb/"/>
+  </url>
+  <url>
+    <loc>https://fileloka.id/id/kompres-pdf-200kb/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/compress-pdf-to-200kb/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/kompres-pdf-200kb/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/compress-pdf-to-200kb/"/>
+  </url>
+  <url>
+    <loc>https://fileloka.id/id/kompres-pdf-300kb/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/compress-pdf-to-300kb/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/kompres-pdf-300kb/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/compress-pdf-to-300kb/"/>
+  </url>
+  <url>
+    <loc>https://fileloka.id/id/kompres-pdf-500kb/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/compress-pdf-to-500kb/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/kompres-pdf-500kb/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/compress-pdf-to-500kb/"/>
+  </url>
+  <url>
+    <loc>https://fileloka.id/id/kompres-pdf-1mb/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/compress-pdf-to-1mb/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/kompres-pdf-1mb/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/compress-pdf-to-1mb/"/>
+  </url>
+  <url>
+    <loc>https://fileloka.id/id/kompres-pdf-2mb/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fileloka.id/compress-pdf-to-2mb/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://fileloka.id/id/kompres-pdf-2mb/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fileloka.id/compress-pdf-to-2mb/"/>
   </url>
 </urlset>
