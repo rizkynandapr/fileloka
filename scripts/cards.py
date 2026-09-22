@@ -46,17 +46,17 @@ KEYS={
  "signature": "signature sign draw tanda tangan ttd"
 }
 CARD_DESC_EN={
- "merge-pdf": "Combine several PDFs into a single file, in the order you choose.",
+ "merge-pdf": "Put several PDFs into one file, in your order.",
  "split-pdf": "Pull out just the pages you need, or save every page separately.",
  "compress-pdf": "Shrink a PDF so it fits email and upload limits.",
- "pdf-to-jpg": "Turn each page of a PDF into a high-quality image.",
- "jpg-to-pdf": "Pack photos and scans into one tidy PDF document.",
- "compress-image": "Cut file size hard while keeping your photos sharp.",
+ "pdf-to-jpg": "Save each PDF page as a JPG.",
+ "jpg-to-pdf": "Put photos and scans into one PDF.",
+ "compress-image": "Make photos much smaller without visible loss.",
  "resize-image": "Scale pictures to exact pixels or a percentage.",
- "convert-image": "Switch between JPG, PNG and WebP in one click.",
- "heic-to-jpg": "Convert iPhone photos to JPG that opens anywhere.",
+ "convert-image": "Switch between JPG, PNG and WebP.",
+ "heic-to-jpg": "Turn iPhone photos into JPGs that open anywhere.",
  "qr-code": "Turn any link or text into a scannable code.",
- "password-generator": "Strong random passwords, made on your device.",
- "word-counter": "Words, characters and reading time as you type.",
+ "password-generator": "Random passwords made on your device.",
+ "word-counter": "Words, characters and reading time, live.",
  "signature": "Draw a signature and save it as a transparent PNG."
 }

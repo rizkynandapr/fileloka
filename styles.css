@@ -346,6 +346,7 @@ body[data-tool] .tool-head{display:none} /* landing pages already carry the H1 *
 .opt select:focus,.opt input:focus,.field textarea:focus,.field input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-soft)}
 .opt input[type="range"]{accent-color:var(--accent); width:180px}
 .opt .range-val{font-family:var(--font-mono); font-size:.82rem; color:var(--ink); min-width:3.5ch}
+.opt > label.check{font-family:var(--font-body); font-size:.94rem; font-weight:500; letter-spacing:0; text-transform:none; color:var(--ink)}
 .checks{display:flex; flex-direction:column; gap:8px}
 .check{display:flex; align-items:center; gap:10px; font-size:.94rem; cursor:pointer; min-height:40px}
 .check input{accent-color:var(--accent); width:17px; height:17px}

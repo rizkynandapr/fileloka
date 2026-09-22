@@ -47,17 +47,17 @@ BRAND_MARK = ('<svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">'
 TXT = {
  "en": dict(pill="Local · 0 uploads", home="Home", tools="Tools", faq="FAQ", privacy="Privacy",
             theme="Switch color theme", lang_label="Bahasa Indonesia", sizes_h="Compress to an exact size",
-            sizes_lead="Upload portals reject files over their limit. Pick the limit — Fileloka fits the PDF under it.",
-            foot="© 2026 Fileloka — every tool runs on your device.", crumbs="Breadcrumb",
-            chooser=("Nice drop.", "What do you want to do with these files?", "Cancel"),
-            overlay="Drop it — we'll route it to the right tool", ad=("Advertisement", "This single ad keeps every tool free."),
+            sizes_lead="Upload forms reject anything over their limit. Pick the number they ask for and Fileloka fits your PDF under it.",
+            foot="© 2026 Fileloka. Every tool runs on your device.", crumbs="Breadcrumb",
+            chooser=("Got it.", "What do you want to do with these files?", "Cancel"),
+            overlay="Let go and we'll suggest a tool", ad=("Advertisement", "This one ad pays for the hosting."),
             all_sizes="Other targets", tool_404="Page not found"),
  "id": dict(pill="Lokal · 0 upload", home="Beranda", tools="Alat", faq="FAQ", privacy="Privasi",
             theme="Ganti tema warna", lang_label="English", sizes_h="Kompres ke ukuran pasti",
-            sizes_lead="Portal unggah menolak file yang melebihi batas. Pilih batasnya — Fileloka mengepaskan PDF di bawahnya.",
-            foot="© 2026 Fileloka — semua alat berjalan di perangkatmu.", crumbs="Navigasi",
-            chooser=("Mantap.", "Mau diapakan file ini?", "Batal"),
-            overlay="Lepaskan — kami arahkan ke alat yang pas", ad=("Iklan", "Satu iklan ini membuat semua alat tetap gratis."),
+            sizes_lead="Formulir online menolak file yang lewat batas. Pilih angka yang diminta, Fileloka yang mengepaskan PDF-mu di bawahnya.",
+            foot="© 2026 Fileloka. Semua alat jalan di perangkatmu.", crumbs="Navigasi",
+            chooser=("Oke.", "File ini mau diapakan?", "Batal"),
+            overlay="Lepaskan, nanti kami sarankan alatnya", ad=("Iklan", "Satu iklan ini yang membayar biaya hosting."),
             all_sizes="Target lain", tool_404="Halaman tidak ditemukan"),
 }
 
@@ -104,7 +104,7 @@ def topbar(lang, twin):
     other_lang = "id" if lang == "en" else "en"
     return f"""<header class="topbar">
   <div class="wrap topbar-in">
-    <a class="brand" href="{home}" aria-label="Fileloka — {t['home']}">{BRAND_MARK}<span class="brand-name">File<em>loka</em></span></a>
+    <a class="brand" href="{home}" aria-label="Fileloka, {t['home']}">{BRAND_MARK}<span class="brand-name">File<em>loka</em></span></a>
     <div class="topbar-actions">
       <span class="privacy-pill" title="{E('All tools run locally in your browser' if lang=='en' else 'Semua alat berjalan lokal di browser-mu')}"><span class="dot"></span>{t['pill']}</span>
       <a class="lang-link" href="{twin}" hreflang="{other_lang}" lang="{other_lang}" aria-label="{t['lang_label']}">{other}</a>
@@ -200,7 +200,7 @@ def render_tool(lang, tid):
     {size_links(lang)}
   </section>"""
     steps = "\n".join(f"<li>{E(s)}</li>" for s in d["steps"])
-    ld = [app_ld(lang, NAMES[tid][lang] + " — Fileloka", url, d["meta"]), faq_ld(lang, d["faqs"]), crumbs_ld(crumbs)]
+    ld = [app_ld(lang, NAMES[tid][lang] + " | Fileloka", url, d["meta"]), faq_ld(lang, d["faqs"]), crumbs_ld(crumbs)]
     page = head(lang, d["title"], d["meta"], url, [("en", en_url), ("id", id_url), ("x-default", en_url)], ld)
     page += f"""
 <body data-tool="{tid}">
@@ -249,7 +249,7 @@ def render_size(lang, key, nbytes, label):
     kicker = "".join(f"<li>{E(k)}</li>" for k in d["kicker"])
     rel = ["merge-pdf", "split-pdf", "jpg-to-pdf"]
     rel_html = "\n".join(f'<a class="rel-link" href="/{pre}{r}/">{E(NAMES[r][lang])}</a>' for r in rel)
-    ld = [app_ld(lang, d["name"] + " — Fileloka", url, d["meta"]), faq_ld(lang, d["faqs"]), crumbs_ld(crumbs)]
+    ld = [app_ld(lang, d["name"] + " | Fileloka", url, d["meta"]), faq_ld(lang, d["faqs"]), crumbs_ld(crumbs)]
     page = head(lang, d["title"], d["meta"], url, [("en", en_url), ("id", id_url), ("x-default", en_url)], ld)
     page += f"""
 <body data-tool="compress-pdf" data-target="{nbytes}">
@@ -306,50 +306,50 @@ def render_size(lang, key, nbytes, label):
 
 # ------------------------------------------------------------------ home
 HOME_EN = dict(
- title="Fileloka — Free PDF & Image Tools. Private, Nothing Uploaded.",
- meta="Compress, merge and split PDFs, convert and resize images, make QR codes and more — free, no sign-up, and private. Every tool runs in your browser; files never leave your device.",
+ title="Fileloka: Free PDF and Image Tools That Don't Upload Your Files",
+ meta="Compress, merge and split PDFs, convert and resize images, make QR codes and more. Free and without sign-up. Every tool runs in your browser, so your files stay on your device.",
  eyebrow=("Local-first", "file tools"),
  h1='File tools that <span class="hl">never see your files.</span>',
- lede='Compress, merge, split and convert PDFs and images for free. Everything runs on your own device — <strong>no uploads, no accounts, no waiting on a server.</strong>',
- proof=["0 files uploaded", "No sign-up", "No watermark", "Phone & desktop"],
- dock=("Drop dock", "ready", "Drop PDFs or images here", "or tap to pick — we'll suggest the right tool"),
+ lede='Compress, merge, split and convert PDFs and images for free. Everything happens in your browser, <strong>so your files never leave your device</strong> and you don\'t need an account.',
+ proof=["0 files uploaded", "No sign-up", "Works on phones"],
+ dock=("Drop dock", "ready", "Drop PDFs or images here", "or tap to pick, and we'll suggest a tool"),
  dock_rows=[("Uploads", "0"), ("Account", "none"), ("Watermark", "none")],
- search_ph="Find a tool… try “compress” or “merge”",
+ search_ph="Find a tool, e.g. compress or merge",
  tabs=[("all", "All"), ("pdf", "PDF"), ("image", "Image"), ("util", "Everyday")],
- grid_label="Tools", grid_empty="No tool matches that search — try “PDF”, “image” or “QR”.",
+ grid_label="Tools", grid_empty="Nothing matches that. Try PDF, image or QR.",
  feat_chips=["100 KB", "200 KB", "500 KB", "1 MB"],
- why_h="Built the opposite way round",
- why=[("Private by design", "Other sites upload your file to a server and promise to delete it later. Fileloka skips the upload entirely — your browser does the work, so there is nothing to store, scan or leak."),
-      ("Fast because it's local", "No upload queue, no transfer time, no spinner on someone else's machine. A typical PDF compresses in seconds — even on slow Wi-Fi, because the Wi-Fi isn't involved."),
-      ("Free because it's light", "With no servers crunching files, running Fileloka costs very little — so nothing hides behind a paywall. No watermarks, no daily limits, no “Pro” nag.")],
+ why_h="How it's different",
+ why=[("Your files stay with you", "Most tool sites upload your file, process it on their server and promise to delete it later. Fileloka skips the upload. Your browser does the work, so there's nothing on our side to store or leak."),
+      ("Quick, even on bad Wi-Fi", "There's nothing to upload and nothing to download back, so a typical PDF is done in a few seconds. Slow hotel Wi-Fi doesn't matter because it isn't involved."),
+      ("Free, and it stays free", "Without servers crunching files, running Fileloka costs very little. That's why every tool is fully usable, without watermarks or a daily limit.")],
  faq_h="Fair questions",
- faqs=[("Are my files really private?", "Yes — and you can verify it. Open your browser's developer tools (F12 → Network) while using any tool: no file is ever sent. You can even load a page, switch off your internet, and the tools keep working."),
-       ("Is there a file size limit?", "No artificial limit. The practical ceiling is your device's memory — phones and laptops handle files up to roughly 100 MB comfortably. Large scans take longer on older devices, since your device does the work."),
-       ("Can I compress a PDF to an exact size like 200 KB?", "Yes. Open Compress PDF, choose Target size and pick 100 KB, 200 KB, 500 KB, 1 MB — or type your own. Fileloka finds the best quality that fits under the limit."),
-       ("Why is it free? What's the catch?", "Processing happens on your device, so hosting costs are tiny and one clearly-labelled ad slot covers them. Every tool is fully functional — no watermarks, no caps."),
-       ("Can I use it for work or clients?", "Absolutely. Because files never leave your device, Fileloka is a safer pick for contracts, IDs and invoices than sites that keep your files on their servers.")],
+ faqs=[("Are my files really private?", "Yes, and you can check. Open your browser's developer tools (F12, then the Network tab) while you use a tool and you'll see no file being sent. You can also load a page, switch off your internet, and the tools keep working."),
+       ("Is there a file size limit?", "Not one we set. Your device's memory is the limit, and most phones and laptops handle files up to around 100 MB without trouble. Big scans take longer on older devices because they're doing the work."),
+       ("Can I compress a PDF to an exact size like 200 KB?", "Yes. Open Compress PDF, choose Target size and pick 100 KB, 200 KB, 500 KB or 1 MB, or type your own number. Fileloka finds the best quality that fits under it."),
+       ("Why is it free?", "Your device does the processing, so hosting costs very little. One clearly labelled ad spot is enough to cover it, and every tool works fully without a watermark."),
+       ("Can I use it for work or for clients?", "Yes. Since files never leave your device, it's a better fit for contracts, IDs and invoices than sites that keep copies on their servers.")],
  privacy_h="Privacy, in plain words",
- privacy=f"<strong>Your files:</strong> never uploaded, never seen by us — all processing happens in your browser. <strong>Your data:</strong> no accounts, no cookies, no analytics. <strong>Advertising:</strong> if an ad is shown in future, the ad provider may use cookies to serve it; that never involves your files. <strong>Contact:</strong> <a href=\"mailto:{CONTACT}\">{CONTACT}</a>.",
+ privacy=f"Your files are processed in your browser and never reach us. There are no accounts, cookies or analytics on this site. If we show ads in the future, the ad provider may set its own cookies, but that never touches your files. Questions: <a href=\"mailto:{CONTACT}\">{CONTACT}</a>.",
 )
 HOME_ID2 = dict(
  title=HOME_ID["title"], meta=HOME_ID["meta"],
  eyebrow=("Lokal", "alat file"),
  h1='Alat file yang <span class="hl">tidak pernah melihat filemu.</span>',
- lede='Kompres, gabung, pisah, dan ubah PDF serta foto secara gratis. Semuanya berjalan di perangkatmu sendiri — <strong>tanpa upload, tanpa akun, tanpa antre server.</strong>',
- proof=["0 file di-upload", "Tanpa daftar", "Tanpa watermark", "HP & laptop"],
- dock=("Dok file", "siap", "Jatuhkan PDF atau foto di sini", "atau ketuk untuk memilih — kami sarankan alat yang pas"),
+ lede='Kompres, gabung, pisah, dan ubah PDF serta foto, gratis. Semua diproses di browser, <strong>jadi filemu tidak pernah keluar dari perangkat</strong> dan kamu tidak perlu bikin akun.',
+ proof=["0 file di-upload", "Tanpa daftar", "Bisa di HP"],
+ dock=("Dok file", "siap", "Seret PDF atau foto ke sini", "atau ketuk untuk memilih, nanti kami sarankan alatnya"),
  dock_rows=[("Upload", "0"), ("Akun", "tidak perlu"), ("Watermark", "tidak ada")],
  search_ph=HOME_ID["search_ph"], tabs=[("all", "Semua"), ("pdf", "PDF"), ("image", "Gambar"), ("util", "Harian")],
  grid_label="Alat", grid_empty=HOME_ID["grid_empty"],
  feat_chips=["100 KB", "200 KB", "500 KB", "1 MB"],
  why_h=HOME_ID["why_h"],
- why=[("Privat dari desainnya", "Situs lain meng-upload file-mu ke server lalu berjanji menghapusnya nanti. Fileloka melewati upload sepenuhnya — browser-mu yang bekerja, jadi tidak ada yang bisa disimpan atau bocor."),
-      ("Cepat karena lokal", "Tanpa antre upload, tanpa waktu transfer. PDF biasa terkompres dalam hitungan detik — bahkan di Wi-Fi lambat, karena Wi-Fi-nya tidak dipakai."),
-      ("Gratis karena ringan", "Tanpa server yang memproses file, biaya menjalankan Fileloka sangat kecil — jadi tidak ada fitur yang dikunci. Tanpa watermark, tanpa batas harian.")],
+ why=[("Filemu tetap di tanganmu", "Kebanyakan situs sejenis meng-upload file ke server lalu janji menghapusnya nanti. Fileloka tidak meng-upload apa pun. Browser-mu yang bekerja, jadi di pihak kami tidak ada file yang bisa tersimpan atau bocor."),
+      ("Tetap cepat walau sinyal jelek", "Tidak ada yang perlu di-upload lalu diunduh lagi, jadi PDF biasa selesai dalam beberapa detik. Wi-Fi lemot tidak berpengaruh karena memang tidak dipakai."),
+      ("Gratis, dan akan tetap gratis", "Karena tidak ada server yang memproses file, biaya menjalankan Fileloka kecil sekali. Makanya semua alat bisa dipakai penuh, tanpa watermark dan tanpa batas harian.")],
  faq_h=HOME_ID["faq_h"],
- faqs=HOME_ID["faqs"][:2] + [("Bisa kompres PDF ke ukuran tertentu, misalnya 200 KB?", "Bisa. Buka Kompres PDF, pilih Target ukuran, lalu klik 100 KB, 200 KB, 500 KB, 1 MB — atau ketik ukuran sendiri. Fileloka mencarikan kualitas terbaik yang masih muat di bawah batas itu.")] + HOME_ID["faqs"][2:],
+ faqs=HOME_ID["faqs"][:2] + [("Bisa kompres PDF ke ukuran tertentu, misalnya 200 KB?", "Bisa. Buka Kompres PDF, pilih Target ukuran, lalu klik 100 KB, 200 KB, 500 KB, atau 1 MB. Bisa juga ketik angka sendiri. Fileloka mencarikan kualitas terbaik yang masih muat di bawahnya.")] + HOME_ID["faqs"][2:],
  privacy_h=HOME_ID["privacy_h"],
- privacy=f"<strong>File kamu:</strong> tidak pernah di-upload dan tidak pernah kami lihat — semua diproses di browser. <strong>Data kamu:</strong> tanpa akun, tanpa cookie, tanpa analytics. <strong>Iklan:</strong> jika nanti ada iklan, penyedia iklan mungkin memakai cookie; itu tidak pernah menyangkut file-mu. <strong>Kontak:</strong> <a href=\"mailto:{CONTACT}\">{CONTACT}</a>.",
+ privacy=f"Filemu diproses di browser dan tidak pernah sampai ke kami. Situs ini tidak memakai akun, cookie, atau analytics. Kalau nanti ada iklan, penyedia iklannya mungkin memasang cookie sendiri, tapi itu tidak pernah menyentuh filemu. Ada pertanyaan? <a href=\"mailto:{CONTACT}\">{CONTACT}</a>.",
 )
 WHY_ICONS = [
  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="m9.5 11.5 2 2 3.5-3.5"/></svg>',
@@ -471,7 +471,7 @@ def render_home(lang):
 
 def render_404():
     t = TXT["en"]
-    page = head("en", "Page not found — Fileloka", "This page doesn't exist. Browse Fileloka's free, private PDF and image tools.",
+    page = head("en", "Page not found | Fileloka", "This page doesn't exist. Browse Fileloka's free, private PDF and image tools.",
                 f"{DOMAIN}/404", [], [], extra='\n<meta name="robots" content="noindex">')
     links = "".join(f'<a class="rel-link" href="/{tid}/">{E(NAMES[tid]["en"])}</a>' for tid in ORDER[:6])
     page += f"""
@@ -480,8 +480,8 @@ def render_404():
 <main class="wrap">
   <div class="tool-hero" style="padding:72px 0 20px">
     <p class="eyebrow"><b>404</b>{t['tool_404']}</p>
-    <h1>This page wandered off.</h1>
-    <p class="lead">The link may be old or mistyped. Every tool is still here — and none of them upload your files. <a href="/id/" hreflang="id">Versi Bahasa Indonesia →</a></p>
+    <h1>We couldn't find that page.</h1>
+    <p class="lead">The link might be old or have a typo. The tools are all still here. <a href="/id/" hreflang="id">Versi Bahasa Indonesia</a></p>
   </div>
   <div class="rel-links">{links}<a class="rel-link" href="/">All tools →</a></div>
 </main>
