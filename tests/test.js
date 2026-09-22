@@ -183,6 +183,30 @@ const PNG_1x1 = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUl
   console.log('\n== 9. fmtBytes ==');
   ok(fmtBytes(0)==='0 B'&&fmtBytes(1024)==='1.0 KB'&&fmtBytes(1536)==='1.5 KB'&&fmtBytes(10*1024*1024)==='10 MB', 'byte formatting: 0 B / 1.0 KB / 1.5 KB / 10 MB');
 
+
+  console.log('\n== 10. Compress to target size (functions read straight from app.js) ==');
+  {
+    const src=require('fs').readFileSync(require('path').join(__dirname,'..','app.js'),'utf8');
+    const grab=re=>{const m=src.match(re);if(!m)throw new Error('not found in app.js: '+re);return m[0];};
+    const code=[grab(/const KB=1000,MB=1000\*KB;/),grab(/async function searchQuality\([\s\S]*?\n}\n/),
+      grab(/function parseTarget\([\s\S]*?\n}\n/),grab(/function fmtTarget\(b\)\{[^\n]*\}/)].join('\n');
+    const {searchQuality,parseTarget,fmtTarget}=new Function(code+';return {searchQuality,parseTarget,fmtTarget};')();
+    // monotonic fake encoder: size grows with quality, like JPEG
+    const enc=base=>async q=>Math.round(base*(0.25+q*q*1.6));
+    let calls=0;const counted=f=>async q=>{calls++;return f(q);};
+    const r=await searchQuality(counted(enc(400000)),200000);
+    ok(r&&r.size<=200000, 'finds a quality whose size fits the 200 KB target ('+(r&&r.size)+' B at q='+(r&&r.q.toFixed(3))+')');
+    ok(r&&r.size>200000*0.9, 'result lands close under the target (>90% of budget used)');
+    ok(calls<=8, 'binary search stays cheap: '+calls+' encodes');
+    ok((await searchQuality(enc(10_000_000),200000))===null, 'returns null when even the lowest quality is too big');
+    const hi=await searchQuality(enc(50000),200000);
+    ok(hi&&hi.q===0.9, 'uses the top quality when everything already fits');
+    ok(parseTarget('200','KB')===200000&&parseTarget('1,5','MB')===1500000, 'parses 200 KB and 1,5 MB (comma decimal) as decimal bytes');
+    ok(parseTarget('abc','KB')===null&&parseTarget('-5','KB')===null&&parseTarget('0','MB')===null, 'rejects invalid / non-positive sizes');
+    ok(fmtTarget(200000)==='200 KB'&&fmtTarget(1000000)==='1 MB'&&fmtTarget(1500000)==='1.5 MB', 'labels: 200 KB · 1 MB · 1.5 MB');
+    ok(200000<=200*1024, 'decimal target also passes portals that count 1 KB = 1024 B');
+  }
+
   console.log('\n=================================');
   console.log(' RESULT: '+pass+' passed, '+fail+' failed');
   console.log('=================================\n');

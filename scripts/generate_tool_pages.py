@@ -1,347 +1,229 @@
 #!/usr/bin/env python3
-"""Generate static per-tool landing pages for Fileloka.
+"""Build every static page of Fileloka from one set of templates.
 
-Each tool gets a real URL (/merge-pdf/, /split-pdf/, ...) with unique
-title, description, intro, steps, FAQ and JSON-LD - the pages Google can
-rank individually. Shared chrome (topbar/footer/ad-slot) is extracted from
-index.html at build time so design stays in sync.
+Outputs (all committed; deploy stays a plain static upload):
+  /index.html, /id/index.html                 home pages (EN / ID)
+  /<tool>/, /id/<tool>/                       13 tools × 2 languages
+  /compress-pdf-to-<size>/, /id/kompres-pdf-<size>/   target-size landings
+  /404.html, /sitemap.xml, /robots.txt
 
-Run from the repo root:  python scripts/generate_tool_pages.py
-Commit the generated folders. Deploy stays a plain static upload.
+Run from the repo root:  python3 scripts/generate_tool_pages.py
 """
-import re, json, os, html, sys
+import hashlib, html, json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from content_en import P
 from content_id import P_ID, NAMES, CARD_DESC_ID, UI, HOME_ID
+from content_sizes import SIZES, slug as size_slug, page as size_page
+from cards import ICONS, CATS, KEYS, CARD_DESC_EN
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DOMAIN = "https://fileloka.id"   # <- replaced once the real domain exists
+DOMAIN = "https://fileloka.id"
+TODAY = "2026-09-23"
+CONTACT = "rizkynandapr@gmail.com"
+ORDER = ["compress-pdf", "merge-pdf", "split-pdf", "pdf-to-jpg", "jpg-to-pdf", "heic-to-jpg",
+         "compress-image", "resize-image", "convert-image", "qr-code", "password-generator",
+         "word-counter", "signature"]
+CONTENT = {"en": P, "id": P_ID}
+PREFIX = {"en": "", "id": "id/"}
+LOCALE = {"en": "en_US", "id": "id_ID"}
+E = html.escape
 
-P = {
- "merge-pdf": dict(
-   title="Merge PDF Files Online Free — No Upload | Fileloka",
-   h1="Merge PDF files into one document",
-   lead="Combine two or more PDFs into a single file, in exactly the order you choose. Unlike other merge tools, your documents are never uploaded — everything happens inside your browser, so contracts, invoices and reports stay on your device.",
-   meta="Combine multiple PDF files into one, free and without uploading. Reorder pages, merge locally in your browser — files never leave your device.",
-   steps=["Choose or drop two or more PDF files — anywhere on the page works.",
-          "Drag the arrows to put them in the right order; page counts are shown for each file.",
-          "Click Merge and download one combined PDF instantly."],
-   faqs=[("Is there a limit to how many PDFs I can merge?",
-          "No fixed limit. The practical ceiling is your device's memory — merging dozens of normal documents is fine on any modern phone or laptop."),
-         ("Will the quality of my PDFs change?",
-          "No. Pages are copied into the new file exactly as they are — text stays selectable, images keep their original resolution, and links keep working."),
-         ("Can I merge password-protected PDFs?",
-          "Not yet. Encrypted files are detected and clearly marked in the list so they're skipped rather than half-processed. Remove the password first, then merge."),
-         ("Why is this safer than other merge tools?",
-          "Most merge sites upload your files to a server, process them there, and promise to delete them later. Here there is no server step at all — you can watch the Network tab in your browser's dev tools and see that nothing is sent.")],
-   related=["split-pdf","compress-pdf","jpg-to-pdf"]),
- "split-pdf": dict(
-   title="Split PDF & Extract Pages Online Free — No Upload | Fileloka",
-   h1="Split a PDF — extract exactly the pages you need",
-   lead="Pull specific pages or page ranges out of a PDF (like 1-3, 7), or save every page as its own file. Processing runs entirely on your device, which makes this one of the few PDF extractors that never sees your document.",
-   meta="Extract pages from a PDF or split every page into separate files — free, private, no upload. Enter ranges like 1-3, 7 and download instantly.",
-   steps=["Choose or drop the PDF you want to split.",
-          "Pick a mode: extract a page range (e.g. 1-3, 7) or save every page as its own PDF.",
-          "Download the extracted pages, or a ZIP when there are many files."],
-   faqs=[("How do I extract just a few pages from a PDF?",
-          "Choose 'Extract pages', type the pages you want — formats like 5, 2-4 or 1-3, 7, 12 all work — and download a new PDF containing only those pages, in order."),
-         ("Can I split a PDF into separate files for every page?",
-          "Yes. Pick 'Every page as its own PDF' and you'll get a ZIP with one numbered PDF per page — useful for splitting scanned batches or shared handouts."),
-         ("Does splitting reduce quality or remove text?",
-          "No. Pages are copied, not re-rendered: text remains selectable and searchable, and images keep full resolution."),
-         ("Is my document uploaded while splitting?",
-          "Never. The file is read into your browser's memory, split there, and discarded when you close the tab. You can even disconnect from the internet after the page loads and the tool keeps working.")],
-   related=["merge-pdf","pdf-to-jpg","compress-pdf"]),
- "compress-pdf": dict(
-   title="Compress PDF Online Free — Shrink Size, No Upload | Fileloka",
-   h1="Compress a PDF to fit email and upload limits",
-   lead="Shrink a PDF right in your browser. Balanced mode re-packs the file and keeps text selectable; Strong mode redraws pages as compressed images for the smallest possible size — you see before/after sizes before downloading.",
-   meta="Reduce PDF file size for free without uploading. Two modes: keep selectable text, or maximum compression. See the size saving before you download.",
-   steps=["Choose or drop the PDF you need to shrink.",
-          "Pick Balanced (keeps text) or Strong (smallest file), and tune image quality if you like.",
-          "Compare the before/after size and download the compressed PDF."],
-   faqs=[("How small will my PDF get?",
-          "It depends on what's inside. Scanned or image-heavy PDFs often shrink 50–90% in Strong mode. Already-efficient, text-only PDFs may barely change — the tool tells you honestly instead of inflating numbers."),
-         ("What's the difference between Balanced and Strong?",
-          "Balanced rewrites the file structure and keeps text selectable and searchable. Strong re-renders each page as a compressed JPEG — much smaller, but text can no longer be selected. Use Balanced for documents you'll edit or search, Strong for archiving and sending."),
-         ("Will my PDF still be readable after compression?",
-          "Yes — you control the quality slider in Strong mode, and the default keeps documents comfortably readable on screen and in print."),
-         ("Is it safe to compress confidential PDFs here?",
-          "Yes. Compression happens on your device; the file is never transmitted. That's a structural guarantee, not a policy promise — there is no server that could store or leak it.")],
-   related=["merge-pdf","split-pdf","compress-image"]),
- "pdf-to-jpg": dict(
-   title="PDF to JPG Converter Online Free — No Upload | Fileloka",
-   h1="Convert PDF pages to JPG images",
-   lead="Turn every page of a PDF into a high-quality JPG — for slides, sharing on chat apps, or embedding in documents. Choose quality and detail level, preview thumbnails, and download one image or a ZIP of all pages.",
-   meta="Convert PDF to JPG images free, without uploading. Choose quality and resolution, preview pages, download single images or a ZIP.",
-   steps=["Choose or drop a PDF file.",
-          "Set JPG quality and detail (screen, print or maximum).",
-          "Convert, preview the thumbnails, and download images individually or as a ZIP."],
-   faqs=[("What resolution will the JPG images be?",
-          "You choose: Good (screen) renders around 1.5×, Sharp (print) 2×, and Maximum 3× the page's base size. Higher detail means larger files, so pick what the images are for."),
-         ("Can I convert just one page to JPG?",
-          "Convert the document, then download only the page you need from the results list — each page is a separate numbered image."),
-         ("Why do some PDFs take longer to convert?",
-          "Each page is genuinely rendered by your own device (the same engine Firefox uses to display PDFs). Long or graphics-heavy documents simply take more work — a progress bar keeps you posted."),
-         ("Are my PDF's contents uploaded during conversion?",
-          "No. Rendering happens locally via pdf.js in your browser. Nothing is sent anywhere — verifiable in your browser's Network tab.")],
-   related=["jpg-to-pdf","compress-image","split-pdf"]),
- "jpg-to-pdf": dict(
-   title="JPG to PDF Converter Online Free — Images to PDF, No Upload | Fileloka",
-   h1="Turn images into a clean PDF document",
-   lead="Pack photos, scans and screenshots (JPG, PNG or WebP) into one tidy PDF. Reorder pages, choose between matching the image size or standard A4, add margins — all without your pictures ever leaving your device.",
-   meta="Convert JPG, PNG or WebP images to PDF free, without uploading. Reorder pages, pick A4 or original size, add margins, download instantly.",
-   steps=["Choose or drop your images — as many as you like, mixed formats are fine.",
-          "Arrange the order and pick a page size: match each image, A4 portrait, or A4 landscape.",
-          "Click Make PDF and download the finished document."],
-   faqs=[("Can I combine photos from my phone into one PDF?",
-          "Yes — that's the main use. Select or drop all the photos, reorder them, and export a single PDF that's easy to email or archive. iPhone HEIC photos need one extra step: run them through the HEIC to JPG tool first, then bring the JPGs back here."),
-         ("Which page size should I choose?",
-          "'Match image' keeps every photo at its natural proportions — best for screenshots. A4 fits each image neatly onto a standard page — best for printing or official submissions."),
-         ("Will my images be compressed?",
-          "JPG images are embedded as-is with no quality loss. PNG and WebP are embedded losslessly too — the PDF simply wraps them."),
-         ("Is this converter really private?",
-          "Yes. The PDF is assembled in your browser's memory using pdf-lib. Your photos are never transmitted, stored, or seen by anyone.")],
-   related=["heic-to-jpg","compress-image","pdf-to-jpg"]),
- "heic-to-jpg": dict(
-   title="HEIC to JPG Converter Online Free — iPhone Photos, No Upload | Fileloka",
-   h1="Convert HEIC (iPhone photos) to JPG",
-   lead="iPhone saves photos as HEIC, which Windows, older apps and many upload forms simply refuse to open. This converts them to ordinary JPG — decoded right on your device, so your photos are never uploaded to anyone's server.",
-   meta="Convert iPhone HEIC photos to JPG free, without uploading. Batch conversion, quality control, decoded locally in your browser.",
-   steps=["Choose or drop your .heic or .heif photos — several at once is fine.",
-          "Pick JPG (opens everywhere) or PNG, and set the quality.",
-          "Convert and download each photo, or all of them as a ZIP."],
-   faqs=[("Why can't I open HEIC files on Windows?",
-          "HEIC is Apple's format. Windows and many websites either need an extra codec or reject the file outright. Converting to JPG solves it permanently, since JPG opens on every device and is accepted by every upload form."),
-         ("Can I convert many iPhone photos at once?",
-          "Yes — select or drop as many as you like and they're converted one after another, with progress shown. Because your own device does the work, there's no queue and no upload wait."),
-         ("Will converting to JPG lose quality?",
-          "JPG is lossy, so there is a small quality cost, but at the default 88% it is not visible in normal viewing or printing. Choose PNG instead if you need a pixel-exact copy, though the file will be much larger."),
-         ("How can HEIC be decoded without a server?",
-          "The page loads libheif, an open-source decoder compiled to JavaScript (about 0.5 MB, once). Your browser then decodes the photo itself. That is why the tool keeps working even if you go offline after the page has loaded.")],
-   related=["compress-image","jpg-to-pdf","convert-image"]),
- "compress-image": dict(
-   title="Compress Images Online Free — JPG, PNG, WebP, No Upload | Fileloka",
-   h1="Compress images without losing what matters",
-   lead="Cut photo file sizes hard — for web forms, email attachments and faster websites — while keeping them sharp. Batch-compress JPG, PNG and WebP, optionally cap the width, and see the exact savings per file.",
-   meta="Compress JPG, PNG and WebP images for free without uploading. Batch processing, quality control, max-width resize, EXIF removed automatically.",
-   steps=["Choose or drop one or many images.",
-          "Set quality, output format (JPG, WebP, or keep original) and an optional max width.",
-          "Compress and download each file or everything as a ZIP, with before/after sizes shown."],
-   faqs=[("How much smaller will my photos get?",
-          "Typical phone photos shrink 60–90% at the default quality with no visible difference on screen. The results list shows the exact before/after size for every file."),
-         ("What happens to the hidden data in my photos?",
-          "Re-encoding to JPG or WebP automatically strips EXIF metadata — GPS location, camera model, timestamps — which is a genuine privacy win when sharing photos publicly."),
-         ("Why didn't my PNG get smaller?",
-          "PNG is lossless, so the quality slider doesn't apply. Use the max-width option to shrink its dimensions, or convert it to JPG/WebP for dramatic savings."),
-         ("Are my photos uploaded for compression?",
-          "No — compression runs on your device using your browser's own image engine. Nothing is transmitted, which also makes it fast: there's no upload wait at all.")],
-   related=["heic-to-jpg","resize-image","convert-image"]),
- "resize-image": dict(
-   title="Resize Images Online Free — Exact Pixels or Percent, No Upload | Fileloka",
-   h1="Resize images to exact pixels or a percentage",
-   lead="Scale pictures to precise dimensions for profile photos, marketplaces, forms and documents. Keep proportions automatically or set exact width × height — in batch, privately, on your own device.",
-   meta="Resize JPG, PNG and WebP images free without uploading. Exact pixel dimensions or percentage scaling, batch support, proportions kept automatically.",
-   steps=["Choose or drop the images you want to resize.",
-          "Enter a width and/or height in pixels — or switch to percent mode.",
-          "Resize and download; new dimensions are added to each filename."],
-   faqs=[("How do I resize without stretching my image?",
-          "Leave 'Keep proportions' on. Enter just a width (or height) and the other side is calculated automatically; enter both and the image is fitted inside without distortion."),
-         ("Can I make an image larger?",
-          "Yes, both pixel and percent modes can upscale. Browsers use high-quality smoothing, but enlarging beyond ~2× will always look soft — that's physics, not the tool."),
-         ("Does resizing reduce image quality?",
-          "Downscaling keeps images crisp. JPG output is saved at 92% quality — visually indistinguishable for photos. PNG stays lossless."),
-         ("Are my pictures uploaded to a server?",
-          "No. Resizing uses your browser's canvas engine locally. Your images never leave your device.")],
-   related=["compress-image","convert-image","jpg-to-pdf"]),
- "convert-image": dict(
-   title="Convert Images Online Free — JPG, PNG, WebP, No Upload | Fileloka",
-   h1="Convert images between JPG, PNG and WebP",
-   lead="Switch formats in one click: WebP screenshots to JPG for compatibility, JPG to PNG for editing, anything to WebP for smaller web images. Batch conversion, quality control, and zero uploads.",
-   meta="Convert images between JPG, PNG and WebP free, without uploading. Batch conversion with quality control — fast, private, in your browser.",
-   steps=["Choose or drop the images to convert — mixed input formats are fine.",
-          "Pick the target format and, for JPG/WebP, the quality level.",
-          "Convert and download the results individually or as a ZIP."],
-   faqs=[("Which format should I choose?",
-          "JPG for photos and maximum compatibility, PNG for screenshots, logos and anything needing transparency, WebP for the smallest files on the modern web. When unsure, JPG is the safe default."),
-         ("What happens to transparency when converting to JPG?",
-          "JPG can't store transparency, so transparent areas are placed on a clean white background — stated up front instead of surprising you with black boxes."),
-         ("Why can't I select WebP output?",
-          "A few browsers (mainly older Safari) can't encode WebP. When that's the case the option is hidden and you'll see a note — JPG and PNG work everywhere."),
-         ("Is the conversion done on a server?",
-          "No — your browser's own canvas engine re-encodes the image locally. Files are never transmitted, which is also why conversion is instant.")],
-   related=["compress-image","resize-image","pdf-to-jpg"]),
- "qr-code": dict(
-   title="Free QR Code Generator — PNG Download, No Sign-up | Fileloka",
-   h1="Make a QR code for any link or text",
-   lead="Type a link, Wi-Fi note or any text and get a crisp, scannable QR code in seconds — sized for screens, print or posters. No account, no watermark, and the code is generated on your device.",
-   meta="Generate QR codes free — no sign-up, no watermark. Download as PNG in screen, print or poster sizes. Created locally in your browser.",
-   steps=["Type or paste the link or text.",
-          "Pick a size: 256 px for screens, 512 px for print, 1024 px for posters.",
-          "Generate and download the PNG."],
-   faqs=[("Do these QR codes expire?",
-          "Never. This generates a plain, static QR code containing exactly your text or URL — there's no shortener or middleman service that could shut down or start charging."),
-         ("Can I use the QR codes commercially?",
-          "Yes — on packaging, menus, flyers, anywhere. The generated image is yours, with no watermark and no attribution required."),
-         ("How much text fits in a QR code?",
-          "Comfortably a URL or a few hundred characters. If you paste something too long the tool says so — shorter content also scans faster from further away."),
-         ("Is what I type sent to a server?",
-          "No. The code is drawn locally in your browser, which matters if you're encoding private links, Wi-Fi details or contact info.")],
-   related=["password-generator","word-counter","signature"]),
- "password-generator": dict(
-   title="Strong Random Password Generator — Free, On-Device | Fileloka",
-   h1="Generate strong random passwords",
-   lead="Create genuinely random passwords using your browser's cryptographic engine — with length, character sets and look-alike filtering under your control, and an honest entropy meter instead of vague 'strength' colors.",
-   meta="Free strong password generator running entirely on your device. Cryptographically random, adjustable length and characters, entropy shown in bits.",
-   steps=["Set the length (16+ recommended) and which character sets to include.",
-          "Optionally avoid look-alike characters (l, 1, O, 0) for passwords you'll type by hand.",
-          "Copy the password — a new one is generated every time you change anything."],
-   faqs=[("Is this generator actually secure?",
-          "Yes. It uses crypto.getRandomValues — the same cryptographic randomness source password managers use — with unbiased sampling, and guarantees every selected character set appears. The code is open source, so this is verifiable."),
-         ("What do the entropy bits mean?",
-          "Entropy measures how hard a password is to brute-force. Roughly: 45 bits is weak, 70 is fair, 100+ is excellent. A 16-character password from all character sets lands around 100 bits — strong for anything."),
-         ("Is my password sent or stored anywhere?",
-          "No. It's generated in your browser's memory and exists only on your screen and clipboard. Nothing is transmitted or saved — refresh the page and it's gone."),
-         ("Should I avoid look-alike characters?",
-          "Turn that option on for passwords you'll read and type manually (Wi-Fi, TVs). For passwords stored in a manager, leave it off for a slightly larger character pool.")],
-   related=["qr-code","word-counter","signature"]),
- "word-counter": dict(
-   title="Word Counter — Words, Characters & Reading Time | Fileloka",
-   h1="Count words, characters and reading time",
-   lead="Paste or type text and get live counts: words, characters (with and without spaces), sentences, paragraphs, unique words, plus estimated reading and speaking time — handy for essays, ads, and speeches.",
-   meta="Free live word counter: words, characters, sentences, paragraphs, unique words, reading and speaking time. Your text never leaves your browser.",
-   steps=["Paste or type your text into the box.",
-          "Counts update live as you edit — no button to press.",
-          "Use reading time (~220 wpm) and speaking time (~130 wpm) to fit limits."],
-   faqs=[("How is reading time calculated?",
-          "Reading time assumes about 220 words per minute (average adult silent reading); speaking time assumes about 130 wpm, a comfortable presentation pace. Both are estimates to plan against, not stopwatch guarantees."),
-         ("Does it work for character-limited platforms?",
-          "Yes — the character counts (with and without spaces) update live, so you can trim a bio, ad, or meta description to an exact limit as you type."),
-         ("What counts as a sentence or paragraph?",
-          "Sentences are split on ., ! and ? endings; paragraphs on blank lines. Text without ending punctuation still counts as one sentence rather than zero."),
-         ("Is my text saved or sent anywhere?",
-          "No. Counting happens in your browser as you type; nothing is transmitted or stored. Paste confidential drafts freely.")],
-   related=["password-generator","qr-code","signature"]),
- "signature": dict(
-   title="Draw Your Signature Online Free — Transparent PNG | Fileloka",
-   h1="Draw a signature and save it as a PNG",
-   lead="Sign with your mouse, finger or stylus and download a clean signature image — transparent PNG for dropping onto documents, or white background for forms. Smooth strokes, undo, ink colors, nothing uploaded.",
-   meta="Create a handwritten signature online free — draw with mouse or touch, download as transparent PNG. Runs on your device; nothing is uploaded.",
-   steps=["Draw your signature on the pad — mouse, finger or stylus all work.",
-          "Adjust pen color and thickness; use Undo to fix a stroke.",
-          "Download as PNG — transparent by default, or tick white background."],
-   faqs=[("How do I put this signature on a PDF or document?",
-          "Download the transparent PNG, then insert it as an image in Word, Google Docs, or your PDF editor and place it on the signature line. The transparent background makes it sit naturally on any page."),
-         ("Is a drawn signature legally valid?",
-          "In many situations and countries, yes — most e-signature laws accept an image of your signature for everyday documents. For high-stakes contracts, check what the receiving party requires; this tool creates the image, not a certified e-signature."),
-         ("Why does my signature look smooth here?",
-          "Strokes are rendered with curve smoothing and high-DPI scaling, so the exported PNG is crisp even when drawn with a fingertip on a phone."),
-         ("Is my signature uploaded or stored?",
-          "No — it exists only in your browser while you draw and in the PNG you download. Close the tab and it's gone, which is exactly what you want for something as personal as a signature.")],
-   related=["jpg-to-pdf","merge-pdf","word-counter"]),
+def asset_ver(name):
+    with open(os.path.join(ROOT, name), "rb") as f:
+        return hashlib.sha256(f.read()).hexdigest()[:10]
+V_CSS, V_JS = asset_ver("styles.css"), asset_ver("app.js")
+
+ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h13m-5-5 5 5-5 5"/></svg>'
+CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>'
+SEARCH_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>'
+UP_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0 4 4m-4-4-4 4"/><path d="M3 15v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3"/></svg>'
+BACK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H7m5 5-5-5 5-5"/></svg>'
+BRAND_MARK = ('<svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">'
+              '<rect x="1" y="1" width="30" height="30" rx="8" fill="var(--ink)"/>'
+              '<path d="M9.5 7.5h7.2l5.3 5.3v11.7H9.5z" fill="none" stroke="var(--bg)" stroke-width="1.9" stroke-linejoin="round"/>'
+              '<path d="M16.5 7.5v5.5H22" fill="none" stroke="var(--bg)" stroke-width="1.9" stroke-linejoin="round"/>'
+              '<circle cx="24.2" cy="24.2" r="4.2" fill="#C4EE2F" stroke="var(--ink)" stroke-width="1.6"/></svg>')
+
+TXT = {
+ "en": dict(pill="Local · 0 uploads", home="Home", tools="Tools", faq="FAQ", privacy="Privacy",
+            theme="Switch color theme", lang_label="Bahasa Indonesia", sizes_h="Compress to an exact size",
+            sizes_lead="Upload forms reject anything over their limit. Pick the number they ask for and Fileloka fits your PDF under it.",
+            foot="© 2026 Fileloka. Every tool runs on your device.", crumbs="Breadcrumb",
+            chooser=("Got it.", "What do you want to do with these files?", "Cancel"),
+            overlay="Let go and we'll suggest a tool", ad=("Advertisement", "This one ad pays for the hosting."),
+            all_sizes="Other targets", tool_404="Page not found"),
+ "id": dict(pill="Lokal · 0 upload", home="Beranda", tools="Alat", faq="FAQ", privacy="Privasi",
+            theme="Ganti tema warna", lang_label="English", sizes_h="Kompres ke ukuran pasti",
+            sizes_lead="Formulir online menolak file yang lewat batas. Pilih angka yang diminta, Fileloka yang mengepaskan PDF-mu di bawahnya.",
+            foot="© 2026 Fileloka. Semua alat jalan di perangkatmu.", crumbs="Navigasi",
+            chooser=("Oke.", "File ini mau diapakan?", "Batal"),
+            overlay="Lepaskan, nanti kami sarankan alatnya", ad=("Iklan", "Satu iklan ini yang membayar biaya hosting."),
+            all_sizes="Target lain", tool_404="Halaman tidak ditemukan"),
 }
 
-
-CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
-SEARCH_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>'
-TODAY = "2026-07-26"
-LANGS = {"en": dict(prefix="", lang="en", locale="en_US"),
-         "id": dict(prefix="id/", lang="id", locale="id_ID")}
-CONTENT = {"en": P, "id": P_ID}
-
-def urls_for(tid):
-    en = f"{DOMAIN}/" + (tid + "/" if tid else "")
-    idu = f"{DOMAIN}/id/" + (tid + "/" if tid else "")
-    return en, idu
-
-def hreflang_links(tid):
-    en, idu = urls_for(tid)
-    return (f'<link rel="alternate" hreflang="en" href="{en}">\n'
-            f'<link rel="alternate" hreflang="id" href="{idu}">\n'
-            f'<link rel="alternate" hreflang="x-default" href="{en}">')
-
-def lang_link(target, label):
-    return f'<a class="lang-link" href="{target}" aria-label="Switch language">{label}</a>'
-
-def topbar_for(base, lang, twin):
-    tb = re.sub(r'<a class="lang-link"[^>]*>[^<]*</a>\s*', "", base)
-    if lang == "id":
-        tb = tb.replace("0 files uploaded — ever", UI["id"]["pill"])
-    m = re.search(r'<button[^>]*id="themeBtn"', tb)
-    return tb[:m.start()] + lang_link(twin, UI[lang]["lang_link"]) + tb[m.start():]
-
-def footer_for(base, lang):
-    if lang == "en":
-        return base
-    f = base.replace('<a href="/">All tools</a>', '<a href="/id/">Beranda</a>')
-    f = f.replace('<a href="/#faq">FAQ</a>', '<a href="/id/#faq">FAQ</a>')
-    f = f.replace('<a href="/#privacy">Privacy</a>', '<a href="/id/#privacy">Privasi</a>')
-    return f
-
-def render_tool(lang, tid, chrome):
-    cfg, d = LANGS[lang], CONTENT[lang][tid]
-    url = f"{DOMAIN}/{cfg['prefix']}{tid}/"
-    en_url, id_url = urls_for(tid)
-    twin = id_url if lang == "en" else en_url
-    ui = UI[lang]
-    faq_html = "\n".join(
-        f"<details>\n  <summary>{html.escape(q)}</summary>\n  <p>{html.escape(a)}</p>\n</details>"
-        for q, a in d["faqs"])
-    steps_html = "\n".join(f"<li>{html.escape(s)}</li>" for s in d["steps"])
-    rel_html = "\n".join(
-        f'<a class="rel-link" href="/{cfg["prefix"]}{r}/">{html.escape(NAMES[r][lang])}</a>'
-        for r in d["related"])
-    ld = {"@context":"https://schema.org","@graph":[
-        {"@type":"SoftwareApplication","name":NAMES[tid][lang]+" — Fileloka",
-         "url":url,"inLanguage":cfg["lang"],
-         "applicationCategory":"UtilitiesApplication","operatingSystem":"Any",
-         "description":d["meta"],
-         "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},
-        {"@type":"FAQPage","inLanguage":cfg["lang"],"mainEntity":[
-            {"@type":"Question","name":q,
-             "acceptedAnswer":{"@type":"Answer","text":a}} for q,a in d["faqs"]]}]}
-    page = f"""<!doctype html>
-<html lang="{cfg['lang']}">
+# ------------------------------------------------------------------ chrome
+def head(lang, title, meta, url, alts, ld, extra=""):
+    alt_html = "\n".join(f'<link rel="alternate" hreflang="{h}" href="{u}">' for h, u in alts)
+    lds = ld if isinstance(ld, list) else [ld]
+    ld_html = "\n".join(f'<script type="application/ld+json">{json.dumps(x, ensure_ascii=False)}</script>' for x in lds)
+    return f"""<!doctype html>
+<html lang="{lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{html.escape(d["title"])}</title>
-<meta name="description" content="{html.escape(d["meta"])}">
+<title>{E(title)}</title>
+<meta name="description" content="{E(meta)}">
 <link rel="canonical" href="{url}">
-{hreflang_links(tid)}
+{alt_html}
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#EDF0F3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#07090D" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Fileloka">
-<meta property="og:locale" content="{cfg['locale']}">
-<meta property="og:title" content="{html.escape(d["title"])}">
-<meta property="og:description" content="{html.escape(d["meta"])}">
+<meta property="og:locale" content="{LOCALE[lang]}">
+<meta property="og:title" content="{E(title)}">
+<meta property="og:description" content="{E(meta)}">
 <meta property="og:url" content="{url}">
-<meta name="twitter:card" content="summary">
-{chrome['theme']}
-{chrome['favicon']}
-{chrome['fonts']}
-<link rel="stylesheet" href="/styles.css">
-<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>
-</head>
+<meta property="og:image" content="{DOMAIN}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css?v={V_CSS}">
+{ld_html}{extra}
+</head>"""
+
+def topbar(lang, twin):
+    t = TXT[lang]
+    home = "/" if lang == "en" else "/id/"
+    other = "ID" if lang == "en" else "EN"
+    other_lang = "id" if lang == "en" else "en"
+    return f"""<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="{home}" aria-label="Fileloka, {t['home']}">{BRAND_MARK}<span class="brand-name">File<em>loka</em></span></a>
+    <div class="topbar-actions">
+      <span class="privacy-pill" title="{E('All tools run locally in your browser' if lang=='en' else 'Semua alat berjalan lokal di browser-mu')}"><span class="dot"></span>{t['pill']}</span>
+      <a class="lang-link" href="{twin}" hreflang="{other_lang}" lang="{other_lang}" aria-label="{t['lang_label']}">{other}</a>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="{t['theme']}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path id="themeIcon" d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></button>
+    </div>
+  </div>
+</header>"""
+
+def footer(lang):
+    t, pre = TXT[lang], PREFIX[lang]
+    tools = "".join(f'<li><a href="/{pre}{tid}/">{E(NAMES[tid][lang])}</a></li>' for tid in ORDER)
+    sizes = "".join(f'<li><a href="/{size_slug(lang,k)}/">{E(("Kompres PDF " if lang=="id" else "Compress PDF to ")+lab)}</a></li>' for k, _, lab in SIZES)
+    home = "/" if lang == "en" else "/id/"
+    other = ("/id/", "Bahasa Indonesia") if lang == "en" else ("/", "English")
+    return f"""<footer>
+  <div class="wrap">
+    <ul class="foot-tools">{tools}{sizes}</ul>
+    <div class="foot-in">
+      <div>{t['foot']}</div>
+      <nav>
+        <a href="{home}">{t['home']}</a>
+        <a href="{home}#faq">{t['faq']}</a>
+        <a href="{home}#privacy">{t['privacy']}</a>
+        <a href="{other[0]}" hreflang="{'id' if lang=='en' else 'en'}">{other[1]}</a>
+        <a href="https://github.com/rizkynandapr/tooldock" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script src="/app.js?v={V_JS}" defer></script>
+</body>
+</html>
+"""
+
+def ad(lang):
+    a, b = TXT[lang]["ad"]
+    return f'<aside class="ad-slot" aria-label="{a}"><span>{a}</span><small>{b}</small></aside>'
+
+def faq_block(faqs):
+    return "\n".join(f"<details>\n  <summary>{E(q)}</summary>\n  <p>{E(a)}</p>\n</details>" for q, a in faqs)
+
+def faq_ld(lang, faqs):
+    return {"@context": "https://schema.org", "@type": "FAQPage", "inLanguage": lang,
+            "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faqs]}
+
+def crumbs_ld(items):
+    return {"@context": "https://schema.org", "@type": "BreadcrumbList",
+            "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": n, "item": u} for i, (n, u) in enumerate(items)]}
+
+def crumbs_html(lang, items):
+    lis = []
+    for i, (n, u) in enumerate(items):
+        path = u.replace(DOMAIN, "")
+        lis.append(f'<li><a href="{path}">{E(n)}</a></li>' if i < len(items) - 1 else f'<li aria-current="page">{E(n)}</li>')
+    return f'<ol class="crumbs" aria-label="{TXT[lang]["crumbs"]}">{"".join(lis)}</ol>'
+
+def app_ld(lang, name, url, desc):
+    return {"@context": "https://schema.org", "@type": "WebApplication", "name": name, "url": url,
+            "inLanguage": lang, "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any (web browser)",
+            "browserRequirements": "Requires JavaScript", "isAccessibleForFree": True, "description": desc,
+            "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+            "publisher": {"@type": "Organization", "name": "Fileloka", "url": DOMAIN + "/"}}
+
+def write(rel, content):
+    path = os.path.join(ROOT, rel)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
+
+def size_links(lang, current=None):
+    out = []
+    for k, _, lab in SIZES:
+        cur = ' aria-current="page"' if k == current else ""
+        out.append(f'<a class="rel-link size" href="/{size_slug(lang,k)}/"{cur}>{lab}</a>')
+    return '<div class="rel-links">' + "".join(out) + "</div>"
+
+# ------------------------------------------------------------------ tool pages
+def render_tool(lang, tid):
+    d, t, ui, pre = CONTENT[lang][tid], TXT[lang], UI[lang], PREFIX[lang]
+    url = f"{DOMAIN}/{pre}{tid}/"
+    en_url, id_url = f"{DOMAIN}/{tid}/", f"{DOMAIN}/id/{tid}/"
+    twin = id_url if lang == "en" else en_url
+    home_url = f"{DOMAIN}/" + pre
+    crumbs = [(t["home"], home_url), (NAMES[tid][lang], url)]
+    rel_html = "\n".join(f'<a class="rel-link" href="/{pre}{r}/">{E(NAMES[r][lang])}</a>' for r in d["related"])
+    sizes = ""
+    if tid == "compress-pdf":
+        sizes = f"""
+  <section class="section">
+    <h2>{t['sizes_h']}</h2>
+    <p class="note" style="margin:-8px 0 16px">{t['sizes_lead']}</p>
+    {size_links(lang)}
+  </section>"""
+    steps = "\n".join(f"<li>{E(s)}</li>" for s in d["steps"])
+    ld = [app_ld(lang, NAMES[tid][lang] + " | Fileloka", url, d["meta"]), faq_ld(lang, d["faqs"]), crumbs_ld(crumbs)]
+    page = head(lang, d["title"], d["meta"], url, [("en", en_url), ("id", id_url), ("x-default", en_url)], ld)
+    page += f"""
 <body data-tool="{tid}">
-{topbar_for(chrome['topbar'], lang, twin)}
+{topbar(lang, twin)}
 <main class="wrap">
   <div class="tool-hero">
-    <a class="back" href="{'/' if lang=='en' else '/id/'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H7m5 5-5-5 5-5"/></svg>{ui['back']}</a>
-    <h1>{html.escape(d["h1"])}</h1>
-    <p class="lead">{html.escape(d["lead"])}</p>
+    {crumbs_html(lang, crumbs)}
+    <h1>{E(d["h1"])}</h1>
+    <p class="lead">{E(d["lead"])}</p>
   </div>
   <section class="view is-active" id="view-tool">
     <div id="toolMount"></div>
-  </section>
-  {chrome['ad']}
+  </section>{sizes}
   <section class="section">
     <h2>{ui['how']}</h2>
     <ol class="howto">
-{steps_html}
+{steps}
     </ol>
   </section>
+  {ad(lang)}
   <section class="section faq">
     <h2>{ui['faq']}</h2>
-{faq_html}
+{faq_block(d["faqs"])}
   </section>
   <section class="section">
     <h2>{ui['rel']}</h2>
@@ -350,186 +232,289 @@ def render_tool(lang, tid, chrome):
     </div>
   </section>
 </main>
-{footer_for(chrome['footer'], lang)}
-<div class="toasts" id="toasts" aria-live="polite"></div>
-<script src="/app.js" defer></script>
-</body>
-</html>
 """
-    out = os.path.join(ROOT, cfg["prefix"] + tid)
-    os.makedirs(out, exist_ok=True)
-    open(os.path.join(out, "index.html"), "w", encoding="utf-8").write(page)
+    page += footer(lang)
+    write(f"{pre}{tid}/index.html", page)
+    return url
 
-def build_id_home(chrome, cards):
-    H = HOME_ID
-    proof = "\n".join(f"<li>{CHECK}{html.escape(p)}</li>" for p in H["proof"])
-    tabs = "\n".join(
-        f'<button class="tab" role="tab" aria-selected="{"true" if i==0 else "false"}" data-cat="{c}">{t}</button>'
-        for i,(c,t) in enumerate(H["tabs"]))
-    card_html = []
-    for tid, c in cards.items():
-        c2 = c.replace(f'href="/{tid}/"', f'href="/id/{tid}/"')
-        c2 = re.sub(r"<h3>[^<]*</h3>", f"<h3>{html.escape(NAMES[tid]['id'])}</h3>", c2)
-        c2 = re.sub(r"</h3><p>[^<]*</p>", f"</h3><p>{html.escape(CARD_DESC_ID[tid])}</p>", c2)
-        c2 = c2.replace(">Open tool <", ">Buka alat <")
-        card_html.append(c2)
-    faq_html = "\n".join(
-        f"<details>\n  <summary>{html.escape(q)}</summary>\n  <p>{html.escape(a)}</p>\n</details>"
-        for q, a in H["faqs"])
-    why = "\n".join(f"<p>{html.escape(p)}</p>" for p in H["why"])
-    priv0 = html.escape(H["privacy"][0])
-    priv1 = html.escape(H["privacy"][1]).replace(
-        "rizkynandapr@gmail.com",
-        '<a href="mailto:rizkynandapr@gmail.com">rizkynandapr@gmail.com</a>')
-    flinks = " ".join(f'<a href="{u}">{t}</a>' for t, u in H["footer_links"])
-    footer = re.sub(r"<nav>.*?</nav>", f"<nav>{flinks}</nav>", chrome["footer"], flags=re.S)
-    en_url, id_url = urls_for(None)
-    ld = {"@context":"https://schema.org","@type":"WebApplication","name":"Fileloka",
-          "url":id_url,"inLanguage":"id","applicationCategory":"UtilitiesApplication",
-          "operatingSystem":"Any","description":H["meta"],
-          "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
-    page = f"""<!doctype html>
-<html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{html.escape(H["title"])}</title>
-<meta name="description" content="{html.escape(H["meta"])}">
-<link rel="canonical" href="{id_url}">
-{hreflang_links(None)}
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Fileloka">
-<meta property="og:locale" content="id_ID">
-<meta property="og:title" content="{html.escape(H["title"])}">
-<meta property="og:description" content="{html.escape(H["meta"])}">
-<meta property="og:url" content="{id_url}">
-<meta name="twitter:card" content="summary">
-{chrome['theme']}
-{chrome['favicon']}
-{chrome['fonts']}
-<link rel="stylesheet" href="/styles.css">
-<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>
-</head>
+# ------------------------------------------------------------------ size landings
+def render_size(lang, key, nbytes, label):
+    d, t, ui, pre = size_page(lang, key, nbytes, label), TXT[lang], UI[lang], PREFIX[lang]
+    url = f"{DOMAIN}/{size_slug(lang,key)}/"
+    en_url, id_url = f"{DOMAIN}/{size_slug('en',key)}/", f"{DOMAIN}/{size_slug('id',key)}/"
+    twin = id_url if lang == "en" else en_url
+    crumbs = [(t["home"], f"{DOMAIN}/{pre}"), (NAMES["compress-pdf"][lang], f"{DOMAIN}/{pre}compress-pdf/"), (label, url)]
+    steps = "\n".join(f"<li>{E(s)}</li>" for s in d["steps"])
+    rows = "\n".join(f"<tr><td>{E(a)}</td><td>{E(b)}</td></tr>" for a, b in d["rows"])
+    kicker = "".join(f"<li>{E(k)}</li>" for k in d["kicker"])
+    rel = ["merge-pdf", "split-pdf", "jpg-to-pdf"]
+    rel_html = "\n".join(f'<a class="rel-link" href="/{pre}{r}/">{E(NAMES[r][lang])}</a>' for r in rel)
+    ld = [app_ld(lang, d["name"] + " | Fileloka", url, d["meta"]), faq_ld(lang, d["faqs"]), crumbs_ld(crumbs)]
+    page = head(lang, d["title"], d["meta"], url, [("en", en_url), ("id", id_url), ("x-default", en_url)], ld)
+    page += f"""
+<body data-tool="compress-pdf" data-target="{nbytes}">
+{topbar(lang, twin)}
+<main class="wrap">
+  <div class="tool-hero">
+    {crumbs_html(lang, crumbs)}
+    <h1>{E(d["h1"])}</h1>
+    <p class="lead">{E(d["lead"])}</p>
+    <ul class="kicker">{kicker}</ul>
+  </div>
+  <section class="view is-active" id="view-tool">
+    <div id="toolMount"></div>
+  </section>
+  <section class="section">
+    <h2>{t['all_sizes']}</h2>
+    {size_links(lang, key)}
+  </section>
+  <section class="section prose">
+    <h2>{E(d["use_h"])}</h2>
+    <p>{E(d["use"])}</p>
+    <h3>{E(d["table_h"])}</h3>
+    <div class="table-wrap"><table class="spec">
+      <thead><tr><th scope="col">{E(d["th"][0])}</th><th scope="col">{E(d["th"][1])}</th></tr></thead>
+      <tbody>
+{rows}
+      </tbody>
+    </table></div>
+    <p class="note">{E(d["table_note"])}</p>
+  </section>
+  <section class="section">
+    <h2>{ui['how']}</h2>
+    <ol class="howto">
+{steps}
+    </ol>
+  </section>
+  {ad(lang)}
+  <section class="section faq">
+    <h2>{ui['faq']}</h2>
+{faq_block(d["faqs"])}
+  </section>
+  <section class="section">
+    <h2>{ui['rel']}</h2>
+    <div class="rel-links">
+<a class="rel-link" href="/{pre}compress-pdf/">{E(NAMES['compress-pdf'][lang])}</a>
+{rel_html}
+    </div>
+  </section>
+</main>
+"""
+    page += footer(lang)
+    write(f"{size_slug(lang,key)}/index.html", page)
+    return url
+
+# ------------------------------------------------------------------ home
+HOME_EN = dict(
+ title="Fileloka: Free PDF and Image Tools That Don't Upload Your Files",
+ meta="Compress, merge and split PDFs, convert and resize images, make QR codes and more. Free and without sign-up. Every tool runs in your browser, so your files stay on your device.",
+ eyebrow=("Local-first", "file tools"),
+ h1='File tools that <span class="hl">never see your files.</span>',
+ lede='Compress, merge, split and convert PDFs and images for free. Everything happens in your browser, <strong>so your files never leave your device</strong> and you don\'t need an account.',
+ proof=["0 files uploaded", "No sign-up", "Works on phones"],
+ dock=("Drop dock", "ready", "Drop PDFs or images here", "or tap to pick, and we'll suggest a tool"),
+ dock_rows=[("Uploads", "0"), ("Account", "none"), ("Watermark", "none")],
+ search_ph="Find a tool, e.g. compress or merge",
+ tabs=[("all", "All"), ("pdf", "PDF"), ("image", "Image"), ("util", "Everyday")],
+ grid_label="Tools", grid_empty="Nothing matches that. Try PDF, image or QR.",
+ feat_chips=["100 KB", "200 KB", "500 KB", "1 MB"],
+ why_h="How it's different",
+ why=[("Your files stay with you", "Most tool sites upload your file, process it on their server and promise to delete it later. Fileloka skips the upload. Your browser does the work, so there's nothing on our side to store or leak."),
+      ("Quick, even on bad Wi-Fi", "There's nothing to upload and nothing to download back, so a typical PDF is done in a few seconds. Slow hotel Wi-Fi doesn't matter because it isn't involved."),
+      ("Free, and it stays free", "Without servers crunching files, running Fileloka costs very little. That's why every tool is fully usable, without watermarks or a daily limit.")],
+ faq_h="Fair questions",
+ faqs=[("Are my files really private?", "Yes, and you can check. Open your browser's developer tools (F12, then the Network tab) while you use a tool and you'll see no file being sent. You can also load a page, switch off your internet, and the tools keep working."),
+       ("Is there a file size limit?", "Not one we set. Your device's memory is the limit, and most phones and laptops handle files up to around 100 MB without trouble. Big scans take longer on older devices because they're doing the work."),
+       ("Can I compress a PDF to an exact size like 200 KB?", "Yes. Open Compress PDF, choose Target size and pick 100 KB, 200 KB, 500 KB or 1 MB, or type your own number. Fileloka finds the best quality that fits under it."),
+       ("Why is it free?", "Your device does the processing, so hosting costs very little. One clearly labelled ad spot is enough to cover it, and every tool works fully without a watermark."),
+       ("Can I use it for work or for clients?", "Yes. Since files never leave your device, it's a better fit for contracts, IDs and invoices than sites that keep copies on their servers.")],
+ privacy_h="Privacy, in plain words",
+ privacy=f"Your files are processed in your browser and never reach us. There are no accounts, cookies or analytics on this site. If we show ads in the future, the ad provider may set its own cookies, but that never touches your files. Questions: <a href=\"mailto:{CONTACT}\">{CONTACT}</a>.",
+)
+HOME_ID2 = dict(
+ title=HOME_ID["title"], meta=HOME_ID["meta"],
+ eyebrow=("Lokal", "alat file"),
+ h1='Alat file yang <span class="hl">tidak pernah melihat filemu.</span>',
+ lede='Kompres, gabung, pisah, dan ubah PDF serta foto, gratis. Semua diproses di browser, <strong>jadi filemu tidak pernah keluar dari perangkat</strong> dan kamu tidak perlu bikin akun.',
+ proof=["0 file di-upload", "Tanpa daftar", "Bisa di HP"],
+ dock=("Dok file", "siap", "Seret PDF atau foto ke sini", "atau ketuk untuk memilih, nanti kami sarankan alatnya"),
+ dock_rows=[("Upload", "0"), ("Akun", "tidak perlu"), ("Watermark", "tidak ada")],
+ search_ph=HOME_ID["search_ph"], tabs=[("all", "Semua"), ("pdf", "PDF"), ("image", "Gambar"), ("util", "Harian")],
+ grid_label="Alat", grid_empty=HOME_ID["grid_empty"],
+ feat_chips=["100 KB", "200 KB", "500 KB", "1 MB"],
+ why_h=HOME_ID["why_h"],
+ why=[("Filemu tetap di tanganmu", "Kebanyakan situs sejenis meng-upload file ke server lalu janji menghapusnya nanti. Fileloka tidak meng-upload apa pun. Browser-mu yang bekerja, jadi di pihak kami tidak ada file yang bisa tersimpan atau bocor."),
+      ("Tetap cepat walau sinyal jelek", "Tidak ada yang perlu di-upload lalu diunduh lagi, jadi PDF biasa selesai dalam beberapa detik. Wi-Fi lemot tidak berpengaruh karena memang tidak dipakai."),
+      ("Gratis, dan akan tetap gratis", "Karena tidak ada server yang memproses file, biaya menjalankan Fileloka kecil sekali. Makanya semua alat bisa dipakai penuh, tanpa watermark dan tanpa batas harian.")],
+ faq_h=HOME_ID["faq_h"],
+ faqs=HOME_ID["faqs"][:2] + [("Bisa kompres PDF ke ukuran tertentu, misalnya 200 KB?", "Bisa. Buka Kompres PDF, pilih Target ukuran, lalu klik 100 KB, 200 KB, 500 KB, atau 1 MB. Bisa juga ketik angka sendiri. Fileloka mencarikan kualitas terbaik yang masih muat di bawahnya.")] + HOME_ID["faqs"][2:],
+ privacy_h=HOME_ID["privacy_h"],
+ privacy=f"Filemu diproses di browser dan tidak pernah sampai ke kami. Situs ini tidak memakai akun, cookie, atau analytics. Kalau nanti ada iklan, penyedia iklannya mungkin memasang cookie sendiri, tapi itu tidak pernah menyentuh filemu. Ada pertanyaan? <a href=\"mailto:{CONTACT}\">{CONTACT}</a>.",
+)
+WHY_ICONS = [
+ '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="m9.5 11.5 2 2 3.5-3.5"/></svg>',
+ '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>',
+ '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M14.5 9.5c0-1.1-1.1-2-2.5-2s-2.5.9-2.5 2 1 1.6 2.5 2 2.5.9 2.5 2-1.1 2-2.5 2-2.5-.9-2.5-2"/></svg>',
+]
+CAT_LABEL = {"en": {"pdf": "PDF", "image": "Image", "util": "Util"}, "id": {"pdf": "PDF", "image": "Gambar", "util": "Harian"}}
+
+def card(lang, tid, H):
+    pre = PREFIX[lang]
+    name = NAMES[tid][lang]
+    desc = CARD_DESC_EN[tid] if lang == "en" else CARD_DESC_ID[tid]
+    go = UI[lang]["open_tool"]
+    feat = tid == "compress-pdf"
+    fm = ('<span class="fm" aria-hidden="true"><span><em>' + ("before" if lang=="en" else "awal") + '</em><b><i style="width:100%"></i></b><s>2.4 MB</s></span>'
+          '<span><em>' + ("after" if lang=="en" else "hasil") + '</em><b><i class="on" style="width:8%"></i></b><s>196 KB</s></span></span>') if feat else ""
+    chips = ('<span class="chips">' + "".join(f"<span>{c}</span>" for c in H["feat_chips"]) + "</span>") if feat else ""
+    keys = KEYS[tid] + (" 100kb 200kb 500kb 1mb target size ukuran" if feat else "")
+    return (f'<a class="card{" feat" if feat else ""}" href="/{pre}{tid}/" data-cat="{CATS[tid]}" data-tab="{CAT_LABEL[lang][CATS[tid]]}" data-k="{E(keys)}">\n'
+            f'  <span class="ic">{ICONS[tid]}</span>{fm}\n'
+            f'  <h3>{E(name)}</h3><p>{E(desc)}</p>{chips}\n'
+            f'  <span class="go">{go} {ARROW}</span>\n</a>')
+
+def render_home(lang):
+    H = HOME_EN if lang == "en" else HOME_ID2
+    t, pre = TXT[lang], PREFIX[lang]
+    url = f"{DOMAIN}/{pre}"
+    twin = f"{DOMAIN}/id/" if lang == "en" else f"{DOMAIN}/"
+    proof = "".join(f"<li>{CHECK}{E(p)}</li>" for p in H["proof"])
+    tabs = "".join(f'<button class="tab" type="button" role="tab" aria-selected="{"true" if i==0 else "false"}" data-cat="{c}">{E(n)}</button>' for i, (c, n) in enumerate(H["tabs"]))
+    cards = "\n".join(card(lang, tid, H) for tid in ORDER)
+    why = "".join(f"<article><h3>{WHY_ICONS[i]}{E(h)}</h3><p>{E(p)}</p></article>" for i, (h, p) in enumerate(H["why"]))
+    rows = "".join(f"<li><span>{E(a)}</span><b>{E(b)}</b></li>" for a, b in H["dock_rows"])
+    site_ld = {"@context": "https://schema.org", "@type": "WebSite", "name": "Fileloka", "url": url, "inLanguage": lang}
+    ld = [app_ld(lang, "Fileloka", url, H["meta"]), site_ld, faq_ld(lang, H["faqs"])]
+    ch = t["chooser"]
+    page = head(lang, H["title"], H["meta"], url, [("en", f"{DOMAIN}/"), ("id", f"{DOMAIN}/id/"), ("x-default", f"{DOMAIN}/")], ld)
+    page += f"""
 <body>
-{topbar_for(chrome['topbar'], 'id', '/')}
+<div class="overlay" id="dropOverlay" aria-hidden="true"><div class="ov-card">{E(t['overlay'])}</div></div>
+<div class="chooser" id="chooser" role="dialog" aria-modal="true" aria-labelledby="chTitle">
+  <div class="ch-card">
+    <h3 id="chTitle">{E(ch[0])}</h3>
+    <p id="chSub">{E(ch[1])}</p>
+    <div class="ch-list" id="chList"></div>
+    <button class="btn btn-ghost btn-sm ch-cancel" id="chCancel" type="button">{E(ch[2])}</button>
+  </div>
+</div>
+{topbar(lang, twin)}
 <main>
 <section class="view is-active" id="view-home">
   <div class="wrap">
     <div class="hero">
-      <h1 class="rise">{H["h1"]}</h1>
-      <p class="lede rise" style="animation-delay:.06s">{H["lede"]}</p>
-      <ul class="proof rise" style="animation-delay:.12s">
-{proof}
-      </ul>
+      <div>
+        <p class="eyebrow rise"><b>{E(H['eyebrow'][0])}</b>{E(H['eyebrow'][1])}</p>
+        <h1 class="rise" style="animation-delay:.04s">{H['h1']}</h1>
+        <p class="lede rise" style="animation-delay:.08s">{H['lede']}</p>
+        <ul class="proof rise" style="animation-delay:.12s">{proof}</ul>
+      </div>
+      <div class="dock hud rise" style="animation-delay:.1s">
+        <div class="dock-head"><span>{E(H['dock'][0])}</span><i>{E(H['dock'][1])}</i></div>
+        <div class="dz" id="heroDz" tabindex="0" role="button" aria-label="{E(H['dock'][2])}">
+          <span class="dz-ic">{UP_SVG}</span><strong>{E(H['dock'][2])}</strong><small>{E(H['dock'][3])}</small><input type="file">
+        </div>
+        <ul class="dock-rows">{rows}</ul>
+      </div>
     </div>
+
     <div class="finder">
       <div class="search">
         {SEARCH_SVG}
-        <input type="search" id="searchInput" placeholder="{html.escape(H["search_ph"])}" aria-label="Cari alat">
+        <input type="search" id="searchInput" placeholder="{E(H['search_ph'])}" aria-label="{E(H['search_ph'])}">
         <kbd>/</kbd>
       </div>
-      <div>
-        <div class="tabs" role="tablist" aria-label="Kategori alat">
-{tabs}
-        </div>
-        <div class="tabs-rule"></div>
-      </div>
+      <div class="tabs" role="tablist" aria-label="{E(H['grid_label'])}">{tabs}</div>
     </div>
+    <h2 class="section-label">{E(H['grid_label'])} · {len(ORDER)}</h2>
     <div class="grid" id="toolGrid">
-{"".join(card_html)}
+{cards}
     </div>
-    <p class="grid-empty" id="gridEmpty">{html.escape(H["grid_empty"])}</p>
-  </div>
-  <div class="wrap">
-  {chrome['ad']}
-  <section class="section">
-    <h2>{html.escape(H["why_h"])}</h2>
-{why}
-  </section>
-  <section class="section faq" id="faq">
-    <h2>{html.escape(H["faq_h"])}</h2>
-{faq_html}
-  </section>
-  <section class="section" id="privacy">
-    <h2>{html.escape(H["privacy_h"])}</h2>
-    <p>{priv0}</p>
-    <p>{priv1}</p>
-  </section>
+    <p class="grid-empty" id="gridEmpty">{E(H['grid_empty'])}</p>
+
+    <section class="section">
+      <h2>{t['sizes_h']}</h2>
+      <p class="note" style="margin:-8px 0 16px">{t['sizes_lead']}</p>
+      {size_links(lang)}
+    </section>
+
+    {ad(lang)}
+
+    <section class="section" id="why">
+      <h2>{E(H['why_h'])}</h2>
+      <div class="why">{why}</div>
+    </section>
+
+    <section class="section faq" id="faq">
+      <h2>{E(H['faq_h'])}</h2>
+{faq_block(H['faqs'])}
+    </section>
+
+    <section class="section" id="privacy">
+      <h2>{E(H['privacy_h'])}</h2>
+      <p class="fineprint">{H['privacy']}</p>
+    </section>
   </div>
 </section>
+
 <section class="view" id="view-tool">
   <div class="wrap">
-    <button class="back" id="backBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H7m5 5-5-5 5-5"/></svg>Semua alat</button>
+    <button class="back" id="backBtn" type="button">{BACK_SVG}{UI[lang]['back']}</button>
     <div id="toolMount"></div>
-  {chrome['ad']}
   </div>
 </section>
 </main>
-{footer}
-<div class="toasts" id="toasts" aria-live="polite"></div>
-<script src="/app.js" defer></script>
-</body>
-</html>
 """
-    os.makedirs(os.path.join(ROOT, "id"), exist_ok=True)
-    open(os.path.join(ROOT, "id", "index.html"), "w", encoding="utf-8").write(page)
+    page += footer(lang)
+    write(f"{pre}index.html", page)
+    return url
 
-def patch_root_index():
-    p = os.path.join(ROOT, "index.html")
-    s = open(p, encoding="utf-8").read()
-    if 'hreflang' not in s:
-        anchor = '<meta property="og:url" content="https://fileloka.id/">'
-        s = s.replace(anchor, anchor + "\n" + hreflang_links(None), 1)
-    if 'lang-link' not in s:
-        m = re.search(r'<button[^>]*id="themeBtn"', s)
-        s = s[:m.start()] + lang_link("/id/", "ID") + s[m.start():]
-    open(p, "w", encoding="utf-8").write(s)
-
-def patch_css():
-    p = os.path.join(ROOT, "styles.css")
-    s = open(p, encoding="utf-8").read()
-    if ".lang-link" not in s:
-        s += ("\n.lang-link{display:inline-flex;align-items:center;padding:6px 11px;margin-right:10px;"
-              "border:1.5px solid var(--line);border-radius:999px;font-weight:700;font-size:.72rem;"
-              "letter-spacing:.06em;color:var(--muted);text-decoration:none}\n"
-              ".lang-link:hover{color:var(--accent);border-color:var(--accent)}\n")
-        open(p, "w", encoding="utf-8").write(s)
+def render_404():
+    t = TXT["en"]
+    page = head("en", "Page not found | Fileloka", "This page doesn't exist. Browse Fileloka's free, private PDF and image tools.",
+                f"{DOMAIN}/404", [], [], extra='\n<meta name="robots" content="noindex">')
+    links = "".join(f'<a class="rel-link" href="/{tid}/">{E(NAMES[tid]["en"])}</a>' for tid in ORDER[:6])
+    page += f"""
+<body>
+{topbar('en', '/id/')}
+<main class="wrap">
+  <div class="tool-hero" style="padding:72px 0 20px">
+    <p class="eyebrow"><b>404</b>{t['tool_404']}</p>
+    <h1>We couldn't find that page.</h1>
+    <p class="lead">The link might be old or have a typo. The tools are all still here. <a href="/id/" hreflang="id">Versi Bahasa Indonesia</a></p>
+  </div>
+  <div class="rel-links">{links}<a class="rel-link" href="/">All tools →</a></div>
+</main>
+"""
+    page += footer("en")
+    write("404.html", page)
 
 def main():
-    idx = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
-    topbar = re.search(r'<header class="topbar">.*?</header>', idx, re.S).group(0)
-    topbar = topbar.replace('href="#" id="brandHome"', 'href="/"')
-    footer = re.search(r"<footer>.*?</footer>", idx, re.S).group(0)
-    footer = footer.replace('<a href="#" data-nav="home">Tools</a>', '<a href="/">All tools</a>')
-    footer = footer.replace('<a href="#faq">FAQ</a>', '<a href="/#faq">FAQ</a>')
-    footer = footer.replace('<a href="#privacy">Privacy</a>', '<a href="/#privacy">Privacy</a>')
-    ad = re.search(r'<aside class="ad-slot".*?</aside>', idx, re.S).group(0)
-    fonts = "\n".join(re.findall(r'<link rel="preconnect"[^>]*>|<link href="https://fonts[^>]*>', idx))
-    favicon = re.search(r'<link rel="icon"[^>]*>', idx).group(0)
-    theme_m = re.search(r'<meta name="theme-color"[^>]*>', idx)
-    chrome = dict(topbar=topbar, footer=footer, ad=ad, fonts=fonts, favicon=favicon,
-                  theme=theme_m.group(0) if theme_m else "")
-    cards = {}
-    for tid in P:
-        m = re.search(r'<a class="card" href="/' + tid + r'/".*?</a>', idx, re.S)
-        cards[tid] = m.group(0)
+    urls = []
     for lang in ("en", "id"):
-        for tid in P:
-            render_tool(lang, tid, chrome)
-    build_id_home(chrome, cards)
-    patch_root_index()
-    patch_css()
-    urls = [f"{DOMAIN}/", f"{DOMAIN}/id/"]
-    urls += [f"{DOMAIN}/{t}/" for t in P] + [f"{DOMAIN}/id/{t}/" for t in P]
+        urls.append(render_home(lang))
+        for tid in ORDER:
+            urls.append(render_tool(lang, tid))
+        for k, b, lab in SIZES:
+            urls.append(render_size(lang, k, b, lab))
+    render_404()
     sm = ['<?xml version="1.0" encoding="UTF-8"?>',
-          '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+          '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">']
     for u in urls:
-        sm += ["  <url>", f"    <loc>{u}</loc>", f"    <lastmod>{TODAY}</lastmod>", "  </url>"]
+        path = u.replace(DOMAIN, "")
+        en_path = path[3:] if path.startswith("/id/") else path
+        if en_path.startswith("/kompres-pdf-"):
+            en_path = "/compress-pdf-to-" + en_path[len("/kompres-pdf-"):]
+        id_path = path if path.startswith("/id/") else ("/id" + path if not path.startswith("/compress-pdf-to-") else "/id/kompres-pdf-" + path[len("/compress-pdf-to-"):])
+        sm += ["  <url>", f"    <loc>{u}</loc>", f"    <lastmod>{TODAY}</lastmod>",
+               f'    <xhtml:link rel="alternate" hreflang="en" href="{DOMAIN}{en_path}"/>',
+               f'    <xhtml:link rel="alternate" hreflang="id" href="{DOMAIN}{id_path}"/>',
+               f'    <xhtml:link rel="alternate" hreflang="x-default" href="{DOMAIN}{en_path}"/>',
+               "  </url>"]
     sm.append("</urlset>")
-    open(os.path.join(ROOT, "sitemap.xml"), "w").write("\n".join(sm) + "\n")
-    open(os.path.join(ROOT, "robots.txt"), "w").write(
-        f"User-agent: *\nAllow: /\n\nSitemap: {DOMAIN}/sitemap.xml\n")
-    print("built", 2 * len(P), "tool pages +", "/id/ home |", len(urls), "URLs in sitemap")
+    write("sitemap.xml", "\n".join(sm) + "\n")
+    write("robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {DOMAIN}/sitemap.xml\n")
+    print(f"built {len(urls)} indexable pages + 404 | css v{V_CSS} js v{V_JS}")
 
 if __name__ == "__main__":
     sys.exit(main())

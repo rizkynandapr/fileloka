@@ -52,9 +52,17 @@ Deliberately **excluded** (need a server or heavy WASM): PDF↔Word/Excel, OCR, 
   - `libheif-js@1.18.2` (asm.js) — decode HEIC/HEIF
   - Image tools use the native Canvas API — no library.
 - **Signature UX features:** drop a file *anywhere* on the page and Fileloka suggests matching tools; hash routing (`#/merge-pdf`) makes every tool linkable; dark mode; `/` to search; keyboard + reduced-motion + focus-visible accessibility.
-- No `localStorage`/`sessionStorage`, no cookies, no analytics, no external requests besides cdnjs + Google Fonts.
+- No `localStorage`/`sessionStorage`, no cookies, no analytics, **zero third-party requests** (fonts are self-hosted in `/fonts/`, OFL).
 
-**Design system (intentionally not the default AI look):** porcelain `#F3F5F4` / ink `#12151A` / cobalt `#2440E8` / manila `#F0E4C3`; type = Gabarito (display) + Public Sans (body — literally designed for government documents) + IBM Plex Mono (numbers). The signature element is the **manila-folder tab on every tool card**, which carries the category label.
+**Design system v3 “Instrument” (Sep 2026):** futuristic-light. Cool paper `#EDF0F3` / ink `#0A0F1A` / electric indigo `#3A2EF0` (interaction) / signal lime `#C4EE2F` (success, savings). Type = Geist + Geist Mono, self-hosted variable woff2 (~52 KB total). Signature elements: HUD corner brackets on the home drop dock, mono read-outs, and the **before→after size meter** in Compress PDF results. Full dark theme.
+
+**Compress PDF engines (v3):**
+- *Smart* — recompresses the JPEG images **inside** the PDF (pdf-lib object walk + canvas re-encode); text, links and vectors untouched.
+- *Target size* — 100 KB / 200 KB / 300 KB / 500 KB / 1 MB / 2 MB / custom. Tries Smart levels first (keeps text) with an interpolating binary search, then falls back to page rasterising with a quality × scale search. Targets are decimal (200 KB = 200,000 B) so the file passes portals counting 1 KB as 1000 *or* 1024 B.
+- *Maximum* — every page rasterised (streamed, low memory).
+- Optional black & white for scans. `searchQuality`/`parseTarget`/`fmtTarget` are unit-tested straight from `app.js`.
+
+**Pages are generated** by `scripts/generate_tool_pages.py` (content in `content_en.py`, `content_id.py`, `content_sizes.py`, `cards.py`): homes, 13 tools × EN/ID, 6 target-size landings × EN/ID (`/compress-pdf-to-200kb/`, `/id/kompres-pdf-200kb/` …), `404.html`, sitemap with hreflang. CSS/JS are cache-busted with `?v=<sha>` and served `immutable`.
 
 ---
 
@@ -81,7 +89,7 @@ Checklist status:
 **Before launch (see SECURITY.md for the full runbook):**
 1. Replace `rizkynandapr@gmail.com` with a real address (page footer + `.well-known/security.txt`).
 2. Lock down the *accounts* (GitHub/Vercel/registrar 2FA, registrar lock, DNSSEC) — for a hardened static site, account takeover is the #1 residual risk.
-3. Optional next level: self-host the three Google Fonts → zero third-party requests of any kind (steps in SECURITY.md §4).
+3. ~~Self-host fonts~~ — **done in v3** (Geist, `/fonts/`); CSP is now `font-src 'self'`.
 4. When you add AdSense later, you will consciously loosen the CSP for Google's domains — the current CSP correctly blocks ads until you do.
 
 ---

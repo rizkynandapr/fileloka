@@ -16,7 +16,7 @@ Baca ini sebelum launch. Bagian 1–2 menjelaskan apa yang sudah dikerjakan di k
 | 2 | **Supply chain** — library pihak ketiga disusupi | Sama kritisnya | **Dieliminasi**: semua library di-vendor lokal, tidak ada script origin eksternal (§2.1) |
 | 3 | **XSS** — nama file jahat (`<img onerror=…>.pdf`) dieksekusi | Pencurian file dalam sesi | Escape di semua titik insersi + CSP tanpa inline script sebagai lapis kedua (§2.2) |
 | 4 | **Clickjacking / framing / MIME sniffing** | Rendah | Diblokir via headers (§2.3) |
-| 5 | **Privasi pasif** — Google Fonts melihat IP pengunjung | Privasi, bukan breach | Satu-satunya request pihak ketiga tersisa; opsi eliminasi di §4 |
+| 5 | ~~Privasi pasif — Google Fonts melihat IP pengunjung~~ | — | **Selesai (v3):** font di-self-host, tidak ada request pihak ketiga |
 | 6 | **Device user sendiri** (malware, browser lawas) | Di luar kendali situs mana pun | Out of scope — tidak ada situs yang bisa menjamin ini |
 
 Kalimat jujur untuk dipakai di halaman publik: *"File kamu tidak pernah meninggalkan device-mu — dan itu bisa kamu buktikan sendiri."* Jangan pernah menulis "100% tidak bisa dihack" — klaim itu tidak bisa dibuktikan untuk sistem apa pun dan menurunkan kredibilitas.
@@ -98,7 +98,7 @@ Untuk situs statis yang sudah dikeraskan, jalur pembobolan yang realistis bukan 
 
 ## 4. Opsional berikutnya (naikkan lagi satu tingkat)
 
-1. **Self-host Google Fonts** (menghapus request pihak ketiga terakhir + patuh preseden GDPR Jerman soal Google Fonts):
+1. ~~**Self-host Google Fonts**~~ — **selesai di v3** (Geist + Geist Mono di `/fonts/`, CSP `font-src 'self'`). (menghapus request pihak ketiga terakhir + patuh preseden GDPR Jerman soal Google Fonts):
    unduh ketiga font (Gabarito, Public Sans, IBM Plex Mono) sebagai `woff2` via google-webfonts-helper → taruh di `/fonts/` + satu `fonts.css` `@font-face` → ganti `<link>` Google Fonts → di CSP, kecilkan `style-src` ke `'self' 'unsafe-inline'` dan `font-src` ke `'self'`. Setelah ini, **satu-satunya koneksi keluar situs = nol**.
 2. Hapus semua atribut `style="…"` → class, lalu buang `'unsafe-inline'` dari `style-src`.
 3. Subresource pinning di sisi user berlebihan untuk same-origin (attacker yang bisa ubah `/lib` bisa ubah HTML-nya juga) — fokus tetap di §3.

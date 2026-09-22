@@ -5,6 +5,8 @@ const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const on=(el,ev,fn,o)=>{if(el)el.addEventListener(ev,fn,o);};
 const DEFAULT_TITLE=document.title;
+const LANG=/^id\b/i.test(document.documentElement.lang||'')?'id':'en';
+const T=(en,id)=>LANG==='id'?id:en;
 
 function h(html){const t=document.createElement('template');t.innerHTML=html.trim();return t.content.firstElementChild;}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -28,7 +30,7 @@ function toast(msg,isErr){
   setTimeout(()=>t.remove(),3600);
 }
 function setBusy(btn,busy,busyText){
-  if(busy){btn.dataset.label=btn.innerHTML;btn.textContent=busyText||'Working…';btn.disabled=true;}
+  if(busy){btn.dataset.label=btn.innerHTML;btn.textContent=busyText||T('Working…','Memproses…');btn.disabled=true;}
   else{if(btn.dataset.label)btn.innerHTML=btn.dataset.label;btn.disabled=false;}
 }
 const isPdf=f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name);
@@ -65,7 +67,7 @@ function loadLib(name){
     if(c.ok()){c.after&&c.after();return res();}
     const s=document.createElement('script');s.src=c.src;
     s.onload=()=>{c.after&&c.after();res();};
-    s.onerror=()=>{delete libCache[name];rej(new Error('A required library failed to load. Check your connection and try again.'));};
+    s.onerror=()=>{delete libCache[name];rej(new Error(T('A required library failed to load. Check your connection and try again.','Komponen alat gagal dimuat. Cek koneksi lalu coba lagi.')));};
     document.head.appendChild(s);
   });
   return libCache[name];
@@ -90,6 +92,7 @@ const homeActive=()=>!!homeView&&homeView.classList.contains('is-active');
 
 const FIXED=document.body.dataset.tool||null;
 function route(){
+  if(!mount)return;
   if(FIXED){
     if(TOOLS[FIXED]&&!mount.dataset.done){mount.dataset.done='1';mount.innerHTML='';TOOLS[FIXED].mount(mount,null);}
     return;
@@ -101,7 +104,7 @@ function route(){
     homeView.classList.remove('is-active');
     toolView.classList.add('is-active');
     mount.innerHTML='';
-    document.title=TOOLS[id].name+' — Fileloka';
+    document.title=TOOLS[id].name+' | Fileloka';
     let files=null;
     if(pendingFiles){files=pendingFiles.filter(TOOLS[id].match);pendingFiles=null;if(!files.length)files=null;}
     TOOLS[id].mount(mount,files);
@@ -164,7 +167,7 @@ on(window,'drop',e=>{
   if(!homeActive()&&activeIntake){
     const ok=files.filter(activeIntake.match);
     if(ok.length)activeIntake.fn(ok);
-    else toast('This tool works with '+activeIntake.label+'.',true);
+    else toast(T('This tool works with ','Alat ini menerima ')+activeIntake.label+'.',true);
     return;
   }
   openChooser(files);
@@ -175,13 +178,13 @@ const chooser=$('#chooser'),chList=$('#chList'),chSub=$('#chSub');
 function openChooser(files){
   if(!chooser)return;
   const pdfs=files.filter(isPdf),imgs=files.filter(isImg),heics=files.filter(isHeic);
-  if(!pdfs.length&&!imgs.length&&!heics.length){toast('Drop PDF, image (JPG, PNG, WebP) or HEIC files.',true);return;}
+  if(!pdfs.length&&!imgs.length&&!heics.length){toast(T('Drop PDF, image (JPG, PNG, WebP) or HEIC files.','Jatuhkan file PDF, gambar (JPG, PNG, WebP) atau HEIC.'),true);return;}
   const total=files.reduce((s,f)=>s+f.size,0);
   const parts=[];
   if(pdfs.length)parts.push(pdfs.length+' PDF'+(pdfs.length>1?'s':''));
   if(imgs.length)parts.push(imgs.length+' image'+(imgs.length>1?'s':''));
   if(heics.length)parts.push(heics.length+' HEIC photo'+(heics.length>1?'s':''));
-  chSub.textContent=parts.join(' + ')+' · '+fmtBytes(total)+' — pick a tool:';
+  chSub.textContent=parts.join(' + ')+' · '+fmtBytes(total)+T('. Pick a tool:','. Pilih alatnya:');
   const opts=[];
   if(pdfs.length>1)opts.push('merge-pdf');
   if(pdfs.length)opts.push('compress-pdf','split-pdf','pdf-to-jpg');
@@ -207,7 +210,7 @@ function toolShell(t,bodyHtml){
   return h('<div>'+
     '<div class="tool-head rise"><span class="ic">'+t.icon+'</span><div><h2>'+esc(t.name)+'</h2><p>'+esc(t.desc)+'</p></div></div>'+
     '<div class="tool-body rise" style="animation-delay:.05s">'+bodyHtml+'</div>'+
-    '<p class="local-note">'+I.shield+'Runs 100% on your device — this file is never uploaded.</p>'+
+    '<p class="local-note">'+I.shield+T('This runs on your device. The file is never uploaded.','Diproses di perangkatmu. File ini tidak di-upload.')+'</p>'+
   '</div>');
 }
 function dzHtml(strong,small){
@@ -223,7 +226,7 @@ function wireDz(dzEl,{accept,multiple,onFiles,match,label}){
   on(dzEl,'keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();inp.click();}});
   on(inp,'change',()=>{
     const fs=Array.from(inp.files).filter(match||(()=>true));
-    if(fs.length)onFiles(fs);else if(inp.files.length)toast('This tool works with '+label+'.',true);
+    if(fs.length)onFiles(fs);else if(inp.files.length)toast(T('This tool works with ','Alat ini menerima ')+label+'.',true);
     inp.value='';
   });
   ['dragenter','dragover'].forEach(ev=>on(dzEl,ev,e=>{e.preventDefault();e.stopPropagation();dzEl.classList.add('drag');}));
@@ -231,7 +234,7 @@ function wireDz(dzEl,{accept,multiple,onFiles,match,label}){
   on(dzEl,'drop',e=>{
     e.stopPropagation();
     const fs=Array.from(e.dataTransfer.files).filter(match||(()=>true));
-    if(fs.length)onFiles(fs);else toast('This tool works with '+label+'.',true);
+    if(fs.length)onFiles(fs);else toast(T('This tool works with ','Alat ini menerima ')+label+'.',true);
   });
   activeIntake={match:match||(()=>true),fn:onFiles,label:label||'these files'};
 }
@@ -244,29 +247,31 @@ function makeProg(root){
     hide(){el.classList.remove('show');}
   };
 }
-function resultHtml(){return '<div class="result"><h4>'+I.ok+'<span>Done</span></h4><p class="rstats"></p><div class="ritems"></div><div class="actions" style="margin-top:6px"></div></div>';}
-function showResult(root,{title,stats,items,note}){
+function resultHtml(){return '<div class="result"><h4>'+I.ok+'<span>'+T('Done','Selesai')+'</span></h4><div class="rpre"></div><p class="rstats"></p><div class="ritems"></div><div class="actions" style="margin-top:6px"></div></div>';}
+function showResult(root,{title,stats,items,note,pre}){
   const el=$('.result',root);
+  $('.rpre',el).innerHTML=pre||'';
+  el.querySelectorAll(':scope > .note').forEach(n=>n.remove());
   $('h4 span',el).textContent=title||'Done';
   $('.rstats',el).innerHTML=stats||'';
   const ritems=$('.ritems',el),acts=$('.actions',el);
   ritems.innerHTML='';acts.innerHTML='';
   if(items.length===1){
-    const b=h('<button class="btn btn-primary">'+I.dl+'Download '+esc(items[0].name)+'</button>');
+    const b=h('<button class="btn btn-primary">'+I.dl+T('Download ','Unduh ')+esc(items[0].name)+'</button>');
     on(b,'click',()=>downloadBlob(items[0].blob,items[0].name));
     acts.appendChild(b);
   }else{
     items.slice(0,30).forEach(it=>{
       const row=h('<div style="display:flex;gap:10px;align-items:center"><span class="fname" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.9rem;font-weight:600">'+esc(it.name)+'</span><span class="fmeta" style="font-family:var(--font-mono);font-size:.76rem;color:var(--muted)">'+fmtBytes(it.blob.size)+'</span></div>');
-      const b=h('<button class="mini-btn" aria-label="Download '+esc(it.name)+'">'+I.dl.replace('stroke-width="2"','stroke-width="1.8"')+'</button>');
+      const b=h('<button class="mini-btn" aria-label="'+T('Download ','Unduh ')+esc(it.name)+'">'+I.dl.replace('stroke-width="2"','stroke-width="1.8"')+'</button>');
       on(b,'click',()=>downloadBlob(it.blob,it.name));
       row.appendChild(b);ritems.appendChild(row);
     });
-    if(items.length>30)ritems.appendChild(h('<p class="note">…and '+(items.length-30)+' more (use “Download all”).</p>'));
-    const zipBtn=h('<button class="btn btn-primary">'+I.dl+'Download all (.zip)</button>');
+    if(items.length>30)ritems.appendChild(h('<p class="note">'+T('…and '+(items.length-30)+' more. Use Download all to get them.','…dan '+(items.length-30)+' lainnya. Pakai Unduh semua untuk mengambilnya.')+'</p>'));
+    const zipBtn=h('<button class="btn btn-primary">'+I.dl+T('Download all (.zip)','Unduh semua (.zip)')+'</button>');
     on(zipBtn,'click',async()=>{
       try{
-        setBusy(zipBtn,true,'Zipping…');
+        setBusy(zipBtn,true,T('Zipping…','Membuat ZIP…'));
         await loadLib('jszip');
         const zip=new JSZip();
         for(const it of items)zip.file(it.name,it.blob);
@@ -296,20 +301,20 @@ async function pdfDocFrom(bytes){
   await loadLib('pdfLib');
   try{return await PDFLib.PDFDocument.load(bytes);}
   catch(err){
-    if(/encrypt/i.test(String(err)))throw new Error('That PDF is password-protected — not supported yet.');
-    throw new Error('Could not read this PDF. The file may be damaged.');
+    if(/encrypt/i.test(String(err)))throw new Error(T('This PDF is password protected, which isn\'t supported yet.','PDF ini dikunci password, dan itu belum didukung.'));
+    throw new Error(T('Could not read this PDF. The file may be damaged.','PDF ini tidak bisa dibaca. Mungkin filenya rusak.'));
   }
 }
 function parseRanges(str,n){
   const out=[],seen=new Set();
   const tokens=String(str).split(',').map(s=>s.trim()).filter(Boolean);
-  if(!tokens.length)throw new Error('Enter page numbers, e.g. 1-3, 7');
+  if(!tokens.length)throw new Error(T('Enter page numbers, for example 1-3, 7','Ketik nomor halaman, misalnya 1-3, 7'));
   for(const t of tokens){
     const m=t.match(/^(\d+)(?:\s*-\s*(\d+))?$/);
-    if(!m)throw new Error('“'+t+'” is not a valid page or range.');
+    if(!m)throw new Error(T('"'+t+'" is not a valid page or range.','"'+t+'" bukan halaman atau rentang yang valid.'));
     let a=parseInt(m[1],10),b=m[2]?parseInt(m[2],10):a;
     if(a>b){const x=a;a=b;b=x;}
-    if(a<1||b>n)throw new Error('Pages must be between 1 and '+n+'.');
+    if(a<1||b>n)throw new Error(T('Pages must be between 1 and '+n+'.','Halaman harus antara 1 dan '+n+'.'));
     for(let p=a;p<=b;p++){if(!seen.has(p)){seen.add(p);out.push(p-1);}}
   }
   return out;
@@ -327,13 +332,13 @@ async function eachPdfPage(bytes,{scale=1.5,onPage,prog}={}){
     await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
     await onPage({canvas:c,index:i,total:n,ptW:v1.width,ptH:v1.height});
     page.cleanup();c.width=0;c.height=0;
-    if(prog)prog.set(i,n,'Page '+i+' of '+n);
+    if(prog)prog.set(i,n,T('Page ','Halaman ')+i+T(' of ',' dari ')+n);
   }
   pdf.destroy();
   return n;
 }
 function canvasToBlob(c,type,q){
-  return new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('Your browser could not encode this image format.')),type,q));
+  return new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error(T('Your browser could not encode this image format.','Browser-mu tidak bisa membuat format gambar ini.'))),type,q));
 }
 function makeSortableList(listEl,state,{badge,onChange}={}){
   function render(){
@@ -358,26 +363,26 @@ function makeSortableList(listEl,state,{badge,onChange}={}){
 
 /* ================= 1 · Merge PDF ================= */
 TOOLS['merge-pdf']={
-  name:'Merge PDF',desc:'Combine several PDFs into one file, in the order you choose.',match:isPdf,
+  name:T('Merge PDF','Gabung PDF'),desc:T('Combine several PDFs into one file, in the order you choose.','Satukan beberapa PDF jadi satu, urutannya kamu yang atur.'),match:isPdf,
   icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="13" y="4" width="8" height="16" rx="2"/><path d="M3 9h6m0 0L7 7m2 2-2 2M3 15h6m0 0-2-2m2 2-2 2"/></svg>',
   mount(root,pre){
     const el=toolShell(this,
-      dzHtml('Choose PDF files','or drop them anywhere on this page — add as many as you like')+
+      dzHtml(T('Choose PDF files','Pilih file PDF'),T('or drop them anywhere on this page. Add as many as you like.','atau seret ke mana saja di halaman ini, boleh banyak sekaligus'))+
       '<ul class="flist"></ul>'+
-      '<div class="actions"><button class="btn btn-primary" id="mergeGo" disabled>Merge PDFs</button>'+
-      '<button class="btn btn-ghost btn-sm" id="mergeClear" hidden>Clear list</button></div>'+
+      '<div class="actions"><button class="btn btn-primary" id="mergeGo" disabled>'+T('Merge PDFs','Gabung PDF')+'</button>'+
+      '<button class="btn btn-ghost btn-sm" id="mergeClear" hidden>'+T('Clear list','Kosongkan daftar')+'</button></div>'+
       progHtml()+resultHtml());
     root.appendChild(el);
     const state=[];
     const goBtn=$('#mergeGo',el),clearBtn=$('#mergeClear',el),prog=makeProg(el);
     const list=makeSortableList($('.flist',el),state,{
-      badge:it=>it.err?'<span class="badge err">locked</span>':(it.pages!=null?'<span class="badge">'+it.pages+' pg</span>':'<span class="badge">…</span>'),
+      badge:it=>it.err?'<span class="badge err">'+T('locked','terkunci')+'</span>':(it.pages!=null?'<span class="badge">'+it.pages+T(' pg',' hal')+'</span>':'<span class="badge">…</span>'),
       onChange:sync
     });
     function sync(){
       const ok=state.filter(x=>!x.err);
       goBtn.disabled=ok.length<2;
-      goBtn.textContent=ok.length>=2?'Merge '+ok.length+' PDFs':'Merge PDFs';
+      goBtn.textContent=ok.length>=2?T('Merge '+ok.length+' PDFs','Gabung '+ok.length+' PDF'):T('Merge PDFs','Gabung PDF');
       clearBtn.hidden=!state.length;
     }
     async function addFiles(fs){
@@ -392,13 +397,13 @@ TOOLS['merge-pdf']={
         list.render();sync();
       }
     }
-    wireDz($('.dz',el),{accept:'.pdf,application/pdf',multiple:true,onFiles:addFiles,match:isPdf,label:'PDF files'});
+    wireDz($('.dz',el),{accept:'.pdf,application/pdf',multiple:true,onFiles:addFiles,match:isPdf,label:T('PDF files','file PDF')});
     on(clearBtn,'click',()=>{state.length=0;list.render();sync();});
     on(goBtn,'click',async()=>{
       const ok=state.filter(x=>!x.err);
       if(ok.length<2)return;
       try{
-        setBusy(goBtn,true,'Merging…');prog.show();
+        setBusy(goBtn,true,T('Merging…','Menggabungkan…'));prog.show();
         await loadLib('pdfLib');
         const out=await PDFLib.PDFDocument.create();
         let done=0;
@@ -411,8 +416,8 @@ TOOLS['merge-pdf']={
         const bytes=await out.save();
         const blob=new Blob([bytes],{type:'application/pdf'});
         showResult(el,{
-          title:'Merged',
-          stats:out.getPageCount()+' pages · '+fmtBytes(blob.size),
+          title:T('Merged','Selesai digabung'),
+          stats:out.getPageCount()+T(' pages · ',' halaman · ')+fmtBytes(blob.size),
           items:[{blob,name:'merged.pdf'}]
         });
       }catch(err){toast(err.message,true);}
@@ -424,19 +429,19 @@ TOOLS['merge-pdf']={
 
 /* ================= 2 · Split PDF ================= */
 TOOLS['split-pdf']={
-  name:'Split PDF',desc:'Pull out just the pages you need, or save every page separately.',match:isPdf,
+  name:T('Split PDF','Pisah PDF'),desc:T('Pull out just the pages you need, or save every page separately.','Ambil halaman tertentu, atau simpan tiap halaman terpisah.'),match:isPdf,
   icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="8" height="16" rx="2"/><path d="M15 9h6m0 0-2-2m2 2-2 2M15 15h6m0 0-2-2m2 2-2 2"/></svg>',
   mount(root,pre){
     const el=toolShell(this,
-      dzHtml('Choose a PDF','or drop it anywhere on this page')+
+      dzHtml(T('Choose a PDF','Pilih file PDF'),T('or drop it anywhere on this page','atau seret ke mana saja di halaman ini'))+
       '<div id="splitPanel" hidden>'+
         '<ul class="flist" style="margin-top:16px"></ul>'+
-        '<div class="opts"><div class="opt"><label>What to do</label><div class="radio-row">'+
-          '<label class="radio-pill"><input type="radio" name="splitMode" value="extract" checked>Extract pages</label>'+
-          '<label class="radio-pill"><input type="radio" name="splitMode" value="all">Every page as its own PDF</label>'+
+        '<div class="opts"><div class="opt"><label>'+T('What to do','Mau diapakan')+'</label><div class="radio-row">'+
+          '<label class="radio-pill"><input type="radio" name="splitMode" value="extract" checked>'+T('Extract pages','Ambil halaman')+'</label>'+
+          '<label class="radio-pill"><input type="radio" name="splitMode" value="all">'+T('Every page as its own PDF','Setiap halaman jadi PDF sendiri')+'</label>'+
         '</div></div>'+
-        '<div class="opt" id="rangeOpt"><label for="rangeIn">Pages (e.g. 1-3, 7)</label><input type="text" id="rangeIn" placeholder="1-3, 7" inputmode="numeric" style="min-width:180px"></div></div>'+
-        '<div class="actions"><button class="btn btn-primary" id="splitGo">Split PDF</button></div>'+
+        '<div class="opt" id="rangeOpt"><label for="rangeIn">'+T('Pages (e.g. 1-3, 7)','Halaman (contoh 1-3, 7)')+'</label><input type="text" id="rangeIn" placeholder="1-3, 7" inputmode="numeric" style="min-width:180px"></div></div>'+
+        '<div class="actions"><button class="btn btn-primary" id="splitGo">'+T('Split PDF','Pisah PDF')+'</button></div>'+
       '</div>'+progHtml()+resultHtml());
     root.appendChild(el);
     let cur=null; // {file, bytes, pages}
@@ -447,21 +452,21 @@ TOOLS['split-pdf']={
         const bytes=await readBytes(f);
         const d=await pdfDocFrom(bytes);
         cur={file:f,bytes,pages:d.getPageCount()};
-        $('.flist',el).innerHTML='<li><span class="fname">'+esc(f.name)+'</span><span class="badge">'+cur.pages+' pages</span><span class="fmeta">'+fmtBytes(f.size)+'</span></li>';
+        $('.flist',el).innerHTML='<li><span class="fname">'+esc(f.name)+'</span><span class="badge">'+cur.pages+T(' pages',' halaman')+'</span><span class="fmeta">'+fmtBytes(f.size)+'</span></li>';
         panel.hidden=false;
         $('#rangeIn',el).placeholder='1-'+cur.pages;
         $('.result',el).classList.remove('show');
       }catch(err){toast(err.message,true);}
     }
-    wireDz($('.dz',el),{accept:'.pdf,application/pdf',multiple:false,onFiles:setFile,match:isPdf,label:'a PDF file'});
+    wireDz($('.dz',el),{accept:'.pdf,application/pdf',multiple:false,onFiles:setFile,match:isPdf,label:T('a PDF file','file PDF')});
     const rangeOpt=$('#rangeOpt',el);
     $$('input[name="splitMode"]',el).forEach(r=>on(r,'change',()=>{rangeOpt.style.display=r.value==='extract'&&r.checked?'':'none';}));
     on($('#splitGo',el),'click',async()=>{
-      if(!cur)return toast('Choose a PDF first.',true);
+      if(!cur)return toast(T('Choose a PDF first.','Pilih PDF dulu.'),true);
       const mode=$('input[name="splitMode"]:checked',el).value;
       const goBtn=$('#splitGo',el);
       try{
-        setBusy(goBtn,true,'Splitting…');
+        setBusy(goBtn,true,T('Splitting…','Memisahkan…'));
         await loadLib('pdfLib');
         const src=await pdfDocFrom(cur.bytes);
         const base=baseName(cur.file.name);
@@ -471,7 +476,7 @@ TOOLS['split-pdf']={
           const pages=await out.copyPages(src,idx);
           pages.forEach(p=>out.addPage(p));
           const blob=new Blob([await out.save()],{type:'application/pdf'});
-          showResult(el,{title:'Pages extracted',stats:idx.length+' of '+cur.pages+' pages · '+fmtBytes(blob.size),
+          showResult(el,{title:T('Pages extracted','Halaman berhasil diambil'),stats:idx.length+T(' of ',' dari ')+cur.pages+T(' pages · ',' halaman · ')+fmtBytes(blob.size),
             items:[{blob,name:base+'-pages.pdf'}]});
         }else{
           prog.show();
@@ -484,7 +489,7 @@ TOOLS['split-pdf']={
             prog.set(i+1,cur.pages);
           }
           items.zipName=base+'-pages';
-          showResult(el,{title:'Split into '+cur.pages+' files',stats:'One PDF per page',items});
+          showResult(el,{title:T('Split into '+cur.pages+' files','Dipisah jadi '+cur.pages+' file'),stats:T('One PDF per page','Satu PDF per halaman'),items});
         }
       }catch(err){toast(err.message,true);}
       finally{setBusy(goBtn,false);prog.hide();}
@@ -494,81 +499,308 @@ TOOLS['split-pdf']={
 };
 
 /* ================= 3 · Compress PDF ================= */
+/* Three engines, best-quality-first:
+   smart  — recompress the JPEG photos/scans *inside* the PDF; text, vectors
+            and links stay intact and selectable.
+   target — hit a size limit (e.g. 200 KB): walks the smart levels first
+            (keeps text), then falls back to page rasterising with a
+            binary search on JPEG quality × render scale.
+   max    — rasterise every page for the smallest possible file. */
+const KB=1000,MB=1000*KB; /* targets are decimal: 200 KB = 200,000 bytes, so the result fits whether a portal counts KB as 1000 or 1024 bytes */
+const SMART_LEVELS=[
+  {maxPx:2200,q:.78},{maxPx:1700,q:.66},{maxPx:1300,q:.56},{maxPx:1000,q:.46},{maxPx:760,q:.38}
+];
+const RASTER_SCALES=[1.5,1.2,1,.8,.62,.5];
+const PDF_PAGE_OVERHEAD=700,PDF_BASE_OVERHEAD=1600;
+
+/* Binary search for the highest quality whose encoded size fits the target.
+   sizeAt(q) -> Promise<bytes>. Returns {q,size} or null when even `lo` is too big.
+   Pure: exported for tests. */
+async function searchQuality(sizeAt,target,lo=.2,hi=.9,iters=6){
+  const sLo=await sizeAt(lo);
+  if(sLo>target)return null;
+  let best={q:lo,size:sLo};
+  const sHi=await sizeAt(hi);
+  if(sHi<=target)return {q:hi,size:sHi};
+  for(let i=0;i<iters;i++){
+    const mid=(lo+hi)/2,s=await sizeAt(mid);
+    if(s<=target){best={q:mid,size:s};lo=mid;}else hi=mid;
+  }
+  return best;
+}
+function parseTarget(val,unit){
+  const n=parseFloat(String(val).replace(',','.'));
+  if(!isFinite(n)||n<=0)return null;
+  return Math.round(n*(unit==='MB'?MB:KB));
+}
+function fmtTarget(b){return b>=MB?(+(b/MB).toFixed(2))+' MB':Math.round(b/KB)+' KB';}
+
+/* ---- smart engine: re-encode embedded JPEG images ---- */
+async function smartCompress(bytes,{maxPx,q,gray},onStep){
+  await loadLib('pdfLib');
+  const {PDFName,PDFRawStream,PDFNumber}=PDFLib;
+  const doc=await pdfDocFrom(bytes);
+  const ctx=doc.context;
+  const imgs=[];
+  for(const [ref,obj] of ctx.enumerateIndirectObjects()){
+    if(!(obj instanceof PDFRawStream))continue;
+    const d=obj.dict;
+    if(String(d.get(PDFName.of('Subtype')))!=='/Image')continue;
+    const f=d.get(PDFName.of('Filter'));
+    const fs=f?String(f):'';
+    if(!/^\/DCTDecode$|^\[\s*\/DCTDecode\s*\]$/.test(fs))continue;  // plain JPEG only
+    const cs=String(d.get(PDFName.of('ColorSpace'))||'');
+    if(/CMYK|Indexed|Separation|DeviceN/.test(cs)||d.get(PDFName.of('Decode')))continue; // colour-exact cases: leave untouched
+    if(d.get(PDFName.of('ImageMask')))continue;
+    imgs.push({ref,obj});
+  }
+  let done=0,saved=0;
+  for(const it of imgs){
+    const d=it.obj.dict,src=it.obj.contents;
+    try{
+      const bmp=await createImageBitmap(new Blob([src],{type:'image/jpeg'}));
+      const r=Math.min(1,maxPx/Math.max(bmp.width,bmp.height));
+      const w=Math.max(1,Math.round(bmp.width*r)),h=Math.max(1,Math.round(bmp.height*r));
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,w,h);g.drawImage(bmp,0,0,w,h);
+      bmp.close&&bmp.close();
+      if(gray)toGray(c);
+      const out=new Uint8Array(await (await canvasToBlob(c,'image/jpeg',q)).arrayBuffer());
+      c.width=0;c.height=0;
+      if(out.length<src.length*.95){
+        const nd=ctx.obj({});
+        for(const [k,v] of d.entries()){
+          const key=k.toString();
+          if(['/Length','/Filter','/DecodeParms','/Width','/Height','/ColorSpace','/BitsPerComponent'].includes(key))continue;
+          nd.set(k,v);
+        }
+        nd.set(PDFName.of('Filter'),PDFName.of('DCTDecode'));
+        nd.set(PDFName.of('Width'),PDFNumber.of(w));
+        nd.set(PDFName.of('Height'),PDFNumber.of(h));
+        nd.set(PDFName.of('ColorSpace'),PDFName.of('DeviceRGB'));
+        nd.set(PDFName.of('BitsPerComponent'),PDFNumber.of(8));
+        ctx.assign(it.ref,PDFRawStream.of(nd,out));
+        saved+=src.length-out.length;
+      }
+    }catch(e){/* undecodable image: keep original */}
+    if(onStep)onStep(++done,imgs.length);
+  }
+  const outBytes=await doc.save({useObjectStreams:true});
+  return {bytes:outBytes,images:imgs.length,saved};
+}
+function toGray(c){
+  const g=c.getContext('2d'),im=g.getImageData(0,0,c.width,c.height),p=im.data;
+  for(let i=0;i<p.length;i+=4){const y=(p[i]*.299+p[i+1]*.587+p[i+2]*.114)|0;p[i]=p[i+1]=p[i+2]=y;}
+  g.putImageData(im,0,0);
+}
+
+/* ---- raster engine: every page -> JPEG ---- */
+async function renderPages(bytes,scale,prog,label){
+  const pages=[];
+  await eachPdfPage(bytes,{scale,prog,onPage:async pg=>{
+    const c=document.createElement('canvas');c.width=pg.canvas.width;c.height=pg.canvas.height;
+    const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(pg.canvas,0,0);
+    pages.push({canvas:c,ptW:pg.ptW,ptH:pg.ptH});
+  }});
+  return pages;
+}
+async function encodePages(pages,q,gray){
+  const out=[];
+  for(const p of pages){
+    let c=p.canvas;
+    if(gray&&!p.grayed){toGray(c);p.grayed=true;}
+    out.push(new Uint8Array(await (await canvasToBlob(c,'image/jpeg',q)).arrayBuffer()));
+  }
+  return out;
+}
+async function buildImagePdf(pages,jpgs){
+  await loadLib('pdfLib');
+  const out=await PDFLib.PDFDocument.create();
+  for(let i=0;i<pages.length;i++){
+    const img=await out.embedJpg(jpgs[i]);
+    const pg=out.addPage([pages[i].ptW,pages[i].ptH]);
+    pg.drawImage(img,{x:0,y:0,width:pages[i].ptW,height:pages[i].ptH});
+  }
+  return out.save();
+}
+function freePages(pages){pages.forEach(p=>{p.canvas.width=0;p.canvas.height=0;});}
+
 TOOLS['compress-pdf']={
-  name:'Compress PDF',desc:'Shrink a PDF so it fits email and upload limits.',match:isPdf,
+  name:T('Compress PDF','Kompres PDF'),desc:T('Shrink a PDF so it fits email and upload limits.','Perkecil PDF agar lolos batas email dan unggahan.'),match:isPdf,
   icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M12 7v3m0 0-2-2m2 2 2-2M12 17v-3m0 0-2 2m2-2 2 2"/></svg>',
   mount(root,pre){
+    const preTarget=parseInt(document.body.dataset.target||'',10)||0;
+    const PRESETS=[100,200,300,500,1000,2000];
+    const presetBtns=PRESETS.map(k=>'<button type="button" data-kb="'+k+'" aria-pressed="false">'+(k>=1000?(k/1000)+' MB':k+' KB')+'</button>').join('');
     const el=toolShell(this,
-      dzHtml('Choose a PDF','or drop it anywhere on this page')+
+      dzHtml(T('Choose a PDF','Pilih file PDF'),T('or drop it anywhere on this page','atau seret ke mana saja di halaman ini'))+
       '<div id="cpPanel" hidden><ul class="flist" style="margin-top:16px"></ul>'+
-        '<div class="opts"><div class="opt"><label>Method</label><div class="radio-row">'+
-          '<label class="radio-pill"><input type="radio" name="cpMode" value="balanced" checked>Balanced — keeps text</label>'+
-          '<label class="radio-pill"><input type="radio" name="cpMode" value="strong">Strong — smallest file</label>'+
-        '</div></div>'+
-        '<div id="cpStrongOpts" style="display:none;gap:14px 22px" class="opts">'+
-          optRange('cpQ','Image quality',40,90,5,70,'%')+
-          '<div class="opt"><label for="cpScale">Detail</label><select id="cpScale"><option value="1.3">Standard — screen</option><option value="1.8">High — print</option></select></div>'+
+        '<div class="opts" style="display:block">'+
+          '<span class="opt-label" id="cpModeLbl">'+T('Method','Metode')+'</span>'+
+          '<div class="seg" role="radiogroup" aria-labelledby="cpModeLbl" style="margin-top:8px">'+
+            '<label><input type="radio" name="cpMode" value="smart"><i>'+T('Best','Terbaik')+'</i><b>'+T('Smart','Pintar')+'</b><small>'+T('Shrinks the photos and scans inside. Text stays selectable.','Mengecilkan foto dan scan di dalamnya. Teks tetap bisa diseleksi.')+'</small></label>'+
+            '<label><input type="radio" name="cpMode" value="target"><b>'+T('Target size','Target ukuran')+'</b><small>'+T('Pick a limit like 200 KB and the file lands just under it.','Pilih batas seperti 200 KB, hasilnya pas di bawahnya.')+'</small></label>'+
+            '<label><input type="radio" name="cpMode" value="max"><b>'+T('Maximum','Maksimal')+'</b><small>'+T('Smallest file. Pages become images.','File paling kecil. Halaman jadi gambar.')+'</small></label>'+
+          '</div>'+
         '</div>'+
-        '<p class="note" id="cpHint">Balanced re-packs the file and keeps text selectable. Strong redraws each page as a compressed image — much smaller, but text can no longer be selected or searched.</p>'+
-        '<div class="actions"><button class="btn btn-primary" id="cpGo">Compress PDF</button></div>'+
+        '<div id="cpTargetOpts" class="opts" style="display:none">'+
+          '<div class="opt" style="flex:1 1 100%"><span class="opt-label">'+T('Maximum file size','Ukuran maksimal')+'</span>'+
+            '<div class="targets">'+presetBtns+
+              '<span class="custom"><input type="number" id="cpCustom" min="10" step="1" inputmode="decimal" placeholder="'+T('Custom','Lainnya')+'" aria-label="'+T('Custom size','Ukuran lain')+'">'+
+              '<select id="cpUnit" aria-label="'+T('Unit','Satuan')+'"><option>KB</option><option>MB</option></select></span>'+
+            '</div></div>'+
+        '</div>'+
+        '<div id="cpMaxOpts" class="opts" style="display:none">'+
+          optRange('cpQ',T('Image quality','Kualitas gambar'),30,90,5,60,'%')+
+          '<div class="opt"><label for="cpScale">'+T('Detail','Detail')+'</label><select id="cpScale"><option value="1">'+T('Low (smallest)','Rendah (terkecil)')+'</option><option value="1.3" selected>'+T('Standard (screen)','Standar (layar)')+'</option><option value="1.8">'+T('High (print)','Tinggi (cetak)')+'</option></select></div>'+
+        '</div>'+
+        '<div class="opts" style="margin-top:14px"><label class="check"><input type="checkbox" id="cpGray">'+T('Black & white (much smaller for text scans)','Hitam putih (jauh lebih kecil untuk scan dokumen)')+'</label></div>'+
+        '<p class="note" id="cpHint"></p>'+
+        '<div class="actions"><button class="btn btn-primary" id="cpGo">'+T('Compress PDF','Kompres PDF')+'</button></div>'+
       '</div>'+progHtml()+resultHtml());
     root.appendChild(el);
-    let cur=null;
-    const prog=makeProg(el);
+    let cur=null,targetBytes=preTarget||200*KB;
+    const prog=makeProg(el),goBtn=$('#cpGo',el);
     wireRange(el,'cpQ',v=>v+'%');
+    const HINT={
+      smart:T('Recompresses the photos and scanned pages inside the PDF and leaves text, links and drawings alone. A PDF that\'s mostly text is already small and may barely change.',
+              'Mengompres ulang foto dan halaman scan di dalam PDF, sementara teks, link, dan grafiknya dibiarkan. PDF yang isinya kebanyakan teks memang sudah kecil, jadi mungkin cuma berkurang sedikit.'),
+      target:T('Fileloka tries to keep the text first. Pages only become images if that can\'t reach the limit. You always see the final size before you download.',
+               'Fileloka mencoba mempertahankan teks dulu. Halaman baru diubah jadi gambar kalau batasnya belum tercapai. Ukuran akhirnya selalu kamu lihat sebelum mengunduh.'),
+      max:T('Redraws every page as a compressed image. You get the smallest file, but the text can no longer be selected or searched.',
+            'Menggambar ulang tiap halaman jadi gambar terkompresi. Hasilnya paling kecil, tapi teks tidak bisa diseleksi atau dicari lagi.')
+    };
+    const mode=()=>$('input[name="cpMode"]:checked',el).value;
+    function syncMode(){
+      const m=mode();
+      $('#cpTargetOpts',el).style.display=m==='target'?'flex':'none';
+      $('#cpMaxOpts',el).style.display=m==='max'?'flex':'none';
+      $('#cpHint',el).textContent=HINT[m];
+      goBtn.textContent=m==='target'?T('Compress to ','Kompres ke ')+fmtTarget(targetBytes):T('Compress PDF','Kompres PDF');
+    }
+    function setTarget(b,fromPreset){
+      targetBytes=b;
+      $$('.targets button',el).forEach(x=>x.setAttribute('aria-pressed',String(fromPreset&&+x.dataset.kb*KB===b)));
+      syncMode();
+    }
+    $$('.targets button',el).forEach(b=>on(b,'click',()=>{$('#cpCustom',el).value='';setTarget(+b.dataset.kb*KB,true);}));
+    const onCustom=()=>{const b=parseTarget($('#cpCustom',el).value,$('#cpUnit',el).value);if(b)setTarget(b,false);};
+    on($('#cpCustom',el),'input',onCustom);on($('#cpUnit',el),'change',onCustom);
+    $$('input[name="cpMode"]',el).forEach(r=>on(r,'change',syncMode));
+    $('input[name="cpMode"][value="'+(preTarget?'target':'smart')+'"]',el).checked=true;
+    if(PRESETS.includes(targetBytes/KB))setTarget(targetBytes,true);else{$('#cpCustom',el).value=Math.round(targetBytes/KB);setTarget(targetBytes,false);}
+
     async function setFile(fs){
       const f=fs[0];
       try{
         const bytes=await readBytes(f);
         const d=await pdfDocFrom(bytes);
-        cur={file:f,bytes,pages:d.getPageCount()};
-        $('.flist',el).innerHTML='<li><span class="fname">'+esc(f.name)+'</span><span class="badge">'+cur.pages+' pages</span><span class="fmeta">'+fmtBytes(f.size)+'</span></li>';
+        const sz=d.getPage(0).getSize();
+        cur={file:f,bytes,pages:d.getPageCount(),area:sz.width*sz.height};
+        $('.flist',el).innerHTML='<li><span class="fname">'+esc(f.name)+'</span><span class="badge">'+cur.pages+' '+T('pages','hal')+'</span><span class="fmeta">'+fmtBytes(f.size)+'</span></li>';
         $('#cpPanel',el).hidden=false;
         $('.result',el).classList.remove('show');
-        if(cur.pages>60)toast('Heads up: '+cur.pages+' pages — Strong mode may take a while on this device.');
+        if(cur.pages>60)toast(T('Heads up: '+cur.pages+' pages can take a while on this device.','Catatan: '+cur.pages+' halaman bisa agak lama diproses di perangkat ini.'));
       }catch(err){toast(err.message,true);}
     }
-    wireDz($('.dz',el),{accept:'.pdf,application/pdf',multiple:false,onFiles:setFile,match:isPdf,label:'a PDF file'});
-    $$('input[name="cpMode"]',el).forEach(r=>on(r,'change',()=>{
-      $('#cpStrongOpts',el).style.display=$('input[name="cpMode"]:checked',el).value==='strong'?'flex':'none';
-    }));
-    on($('#cpGo',el),'click',async()=>{
-      if(!cur)return toast('Choose a PDF first.',true);
-      const goBtn=$('#cpGo',el);
-      const mode=$('input[name="cpMode"]:checked',el).value;
+    wireDz($('.dz',el),{accept:'.pdf,application/pdf',multiple:false,onFiles:setFile,match:isPdf,label:T('a PDF file','file PDF')});
+
+    async function runSmart(level,gray){
+      return (await smartCompress(cur.bytes,{...level,gray},(i,n)=>prog.set(i,n,T('Image ','Gambar ')+i+' / '+n))).bytes;
+    }
+    async function runTarget(target,gray){
+      /* 1 — text-preserving levels */
+      let best=null;
+      if(cur.file.size<=target&&!gray)return {bytes:cur.bytes,hit:true,kept:true,already:true};
+      for(let i=0;i<SMART_LEVELS.length;i++){
+        prog.set(i,SMART_LEVELS.length+RASTER_SCALES.length,T('Trying text-preserving level ','Mencoba level penjaga teks ')+(i+1));
+        const b=await runSmart(SMART_LEVELS[i],gray);
+        if(!best||b.length<best.length)best=b;
+        if(b.length<=target){
+          if(i===0)return {bytes:b,hit:true,kept:true};
+          /* refine between the level that fit and the one that didn't, so we use the budget instead of undershooting */
+          const A=SMART_LEVELS[i],Bv=SMART_LEVELS[i-1],mix=x=>({maxPx:Math.round(A.maxPx+(Bv.maxPx-A.maxPx)*x),q:A.q+(Bv.q-A.q)*x});
+          const cache=new Map([[0,b]]);
+          const sizeAt=async x=>{x=Math.round(x*100)/100;if(!cache.has(x))cache.set(x,await runSmart(mix(x),gray));return cache.get(x).length;};
+          prog.show(T('Fine-tuning quality under ','Menyetel kualitas di bawah ')+fmtTarget(target)+'…');
+          const r=await searchQuality(sizeAt,target,0,.95,4);
+          return {bytes:cache.get(Math.round(r.q*100)/100),hit:true,kept:true};
+        }
+        if(i===0&&b.length>cur.file.size*.97)break; // no photos to shrink — go straight to raster
+      }
+      /* 2 — raster with quality search, from sharpest scale down */
+      let rBest=null;
+      for(const s of RASTER_SCALES){
+        if(cur.area*s*s*cur.pages>45e6&&s!==RASTER_SCALES[RASTER_SCALES.length-1])continue; // memory budget (~180 MB of canvas)
+        const pages=await renderPages(cur.bytes,s,prog,T('Rendering pages','Merender halaman'));
+        try{
+          const n=pages.length;
+          const cache=new Map();
+          const sizeAt=async q=>{
+            q=Math.round(q*100)/100;
+            if(!cache.has(q))cache.set(q,await encodePages(pages,q,gray));
+            return cache.get(q).reduce((a,j)=>a+j.length,0)+PDF_PAGE_OVERHEAD*n+PDF_BASE_OVERHEAD;
+          };
+          prog.show(T('Searching the best quality under ','Mencari kualitas terbaik di bawah ')+fmtTarget(target)+'…');
+          const r=await searchQuality(sizeAt,target,.2,.9,6);
+          if(r){
+            let q=Math.round(r.q*100)/100,bytes=await buildImagePdf(pages,cache.get(q));
+            while(bytes.length>target&&q>.2){q=Math.round((q-.05)*100)/100;await sizeAt(q);bytes=await buildImagePdf(pages,cache.get(q));}
+            if(bytes.length<=target)return {bytes,hit:true,kept:false,q};
+          }
+          const lowest=await buildImagePdf(pages,(await sizeAt(.2),cache.get(.2)));
+          if(!rBest||lowest.length<rBest.length)rBest=lowest;
+        }finally{freePages(pages);}
+      }
+      const fallback=rBest&&(!best||rBest.length<best.length)?rBest:best;
+      return {bytes:fallback,hit:false,kept:fallback===best};
+    }
+
+    on(goBtn,'click',async()=>{
+      if(!cur)return toast(T('Choose a PDF first.','Pilih PDF terlebih dahulu.'),true);
+      const m=mode(),gray=$('#cpGray',el).checked;
       try{
-        setBusy(goBtn,true,'Compressing…');
-        let outBytes,note='';
-        if(mode==='balanced'){
-          const d=await pdfDocFrom(cur.bytes);
-          outBytes=await d.save({useObjectStreams:true});
-          note='Text and links preserved. For a much smaller file, try Strong mode.';
+        setBusy(goBtn,true,T('Compressing…','Mengompres…'));prog.show(T('Preparing…','Menyiapkan…'));
+        let outBytes,note='',hit=null,kept=true;
+        if(m==='smart'){
+          outBytes=await runSmart(SMART_LEVELS[0],gray);
+          if(outBytes.length>=cur.file.size*.97)note=T('There isn\'t much to shrink here without turning pages into images. Try Target size or Maximum.','PDF ini hampir tidak bisa dikecilkan tanpa mengubah halaman jadi gambar. Coba mode Target ukuran atau Maksimal.');
+          else note=T('Text, links and drawings are unchanged.','Teks, link, dan grafiknya tetap utuh.');
+        }else if(m==='target'){
+          const r=await runTarget(targetBytes,gray);
+          outBytes=r.bytes;hit=r.hit;kept=r.kept;
+          if(r.already)note=T('This file is already under '+fmtTarget(targetBytes)+', so there was nothing to change.','File ini sudah di bawah '+fmtTarget(targetBytes)+', jadi tidak ada yang perlu diubah.');
+          else if(r.hit&&r.kept)note=T('Reached the target with text still selectable.','Target tercapai dan teks tetap bisa diseleksi.');
+          else if(r.hit)note=T('To reach the target, pages were turned into images, so the text is no longer selectable.','Supaya target tercapai, halaman diubah jadi gambar. Teksnya tidak bisa diseleksi lagi.');
+          else note=T('This is as small as the PDF gets while staying readable. Try black & white, or split the PDF and send it in parts.','Segini ukuran terkecil yang masih enak dibaca. Coba opsi hitam putih, atau pisah PDF-nya lalu kirim per bagian.');
         }else{
-          prog.show('Preparing…');
+          const q=(+$('#cpQ',el).value)/100,scale=+$('#cpScale',el).value;
           await loadLib('pdfLib');
-          const q=(+$('#cpQ',el).value)/100;
-          const scale=+$('#cpScale',el).value;
           const out=await PDFLib.PDFDocument.create();
-          await eachPdfPage(cur.bytes,{scale,prog,onPage:async(pg)=>{
-            const blob=await canvasToBlob(pg.canvas,'image/jpeg',q);
-            const img=await out.embedJpg(new Uint8Array(await blob.arrayBuffer()));
-            const p=out.addPage([pg.ptW,pg.ptH]);
-            p.drawImage(img,{x:0,y:0,width:pg.ptW,height:pg.ptH});
+          await eachPdfPage(cur.bytes,{scale,prog,onPage:async pg=>{
+            if(gray)toGray(pg.canvas);
+            const img=await out.embedJpg(new Uint8Array(await (await canvasToBlob(pg.canvas,'image/jpeg',q)).arrayBuffer()));
+            out.addPage([pg.ptW,pg.ptH]).drawImage(img,{x:0,y:0,width:pg.ptW,height:pg.ptH});
           }});
           outBytes=await out.save();
-          note='Strong mode redraws pages as images — text is no longer selectable. Switch to Balanced if you need selectable text.';
+          kept=false;
+          note=T('Pages were redrawn as images, so the text is no longer selectable.','Halaman digambar ulang jadi gambar, jadi teksnya tidak bisa diseleksi lagi.');
         }
-        const blob=new Blob([outBytes],{type:'application/pdf'});
-        const before=cur.file.size,after=blob.size;
-        const pct=Math.round(100*(before-after)/before);
-        const delta=after<before
-          ?'<span class="saving">−'+pct+'%</span>'
-          :'<span class="growing">+'+Math.abs(pct)+'% (already efficient)</span>';
-        showResult(el,{title:'Compressed',
-          stats:fmtBytes(before)+' → '+fmtBytes(after)+' · '+delta,
-          items:[{blob,name:baseName(cur.file.name)+'-compressed.pdf'}],note});
+        let blob=new Blob([outBytes],{type:'application/pdf'});
+        const before=cur.file.size;
+        if(blob.size>=before&&!(m==='target'&&hit)){blob=new Blob([cur.bytes],{type:'application/pdf'});}
+        const after=blob.size,pct=Math.max(0,Math.round(100*(before-after)/before));
+        const scaleMax=Math.max(before,m==='target'?targetBytes:0);
+        const bar=(cls,lab,val,w,extra)=>'<div class="row '+cls+'"><span>'+lab+'</span><span class="track"><span class="fill" style="width:'+Math.max(1.5,100*w/scaleMax).toFixed(1)+'%"></span>'+(extra||'')+'</span><b>'+fmtBytes(val)+'</b></div>';
+        const tMark=m==='target'?'<span class="target" style="left:'+Math.min(99.5,100*targetBytes/scaleMax).toFixed(1)+'%" title="'+T('Target','Target')+'"></span>':'';
+        const meter='<div class="meter-size">'+bar('before',T('Before','Awal'),before,before)+bar('after',T('After','Hasil'),after,after,tMark)+'</div>';
+        const badge=hit===null?'':(hit?' <span class="hit yes">'+I.ok.replace('<svg','<svg width="12" height="12"')+T('Under ','Di bawah ')+esc(fmtTarget(targetBytes))+'</span>':' <span class="hit no">'+T('Closest possible','Paling mendekati')+'</span>');
+        showResult(el,{title:after<before?T('Compressed','Selesai dikompres'):T('Already optimal','Sudah optimal'),
+          stats:(after<before?'<span class="saving">−'+pct+'%</span>':T('no smaller','tidak lebih kecil'))+' · '+(kept?T('text kept','teks utuh'):T('image pages','halaman gambar'))+badge,
+          pre:meter,
+          items:[{blob,name:baseName(cur.file.name)+(m==='target'?'-'+fmtTarget(targetBytes).replace(/\s/g,'').toLowerCase():'-compressed')+'.pdf'}],note:esc(note)});
       }catch(err){toast(err.message,true);}
-      finally{setBusy(goBtn,false);prog.hide();}
+      finally{setBusy(goBtn,false);prog.hide();syncMode();}
     });
     if(pre)setFile(pre);
   }
@@ -576,15 +808,15 @@ TOOLS['compress-pdf']={
 
 /* ================= 4 · PDF to JPG ================= */
 TOOLS['pdf-to-jpg']={
-  name:'PDF to JPG',desc:'Turn each page of a PDF into a high-quality image.',match:isPdf,
+  name:T('PDF to JPG','PDF ke JPG'),desc:T('Turn each page of a PDF into a high-quality image.','Ubah tiap halaman PDF jadi gambar berkualitas.'),match:isPdf,
   icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="9.5" cy="9.5" r="1.6"/><path d="m4 17 4.5-4.5 3 3L15 12l5 5"/></svg>',
   mount(root,pre){
     const el=toolShell(this,
-      dzHtml('Choose a PDF','or drop it anywhere on this page')+
+      dzHtml(T('Choose a PDF','Pilih file PDF'),T('or drop it anywhere on this page','atau seret ke mana saja di halaman ini'))+
       '<div id="pjPanel" hidden><ul class="flist" style="margin-top:16px"></ul>'+
-        '<div class="opts">'+optRange('pjQ','JPG quality',60,95,5,85,'%')+
-        '<div class="opt"><label for="pjScale">Detail</label><select id="pjScale"><option value="1.5">Good — screen</option><option value="2" selected>Sharp — print</option><option value="3">Maximum</option></select></div></div>'+
-        '<div class="actions"><button class="btn btn-primary" id="pjGo">Convert to JPG</button></div>'+
+        '<div class="opts">'+optRange('pjQ',T('JPG quality','Kualitas JPG'),60,95,5,85,'%')+
+        '<div class="opt"><label for="pjScale">'+T('Detail','Detail')+'</label><select id="pjScale"><option value="1.5">'+T('Good (screen)','Bagus (layar)')+'</option><option value="2" selected>'+T('Sharp (print)','Tajam (cetak)')+'</option><option value="3">'+T('Maximum','Maksimal')+'</option></select></div></div>'+
+        '<div class="actions"><button class="btn btn-primary" id="pjGo">'+T('Convert to JPG','Ubah ke JPG')+'</button></div>'+
         '<div class="thumbs" id="pjThumbs"></div>'+
       '</div>'+progHtml()+resultHtml());
     root.appendChild(el);
@@ -596,18 +828,18 @@ TOOLS['pdf-to-jpg']={
         const bytes=await readBytes(f);
         const d=await pdfDocFrom(bytes);
         cur={file:f,bytes,pages:d.getPageCount()};
-        $('.flist',el).innerHTML='<li><span class="fname">'+esc(f.name)+'</span><span class="badge">'+cur.pages+' pages</span><span class="fmeta">'+fmtBytes(f.size)+'</span></li>';
+        $('.flist',el).innerHTML='<li><span class="fname">'+esc(f.name)+'</span><span class="badge">'+cur.pages+T(' pages',' halaman')+'</span><span class="fmeta">'+fmtBytes(f.size)+'</span></li>';
         $('#pjPanel',el).hidden=false;
         $('#pjThumbs',el).innerHTML='';
         $('.result',el).classList.remove('show');
       }catch(err){toast(err.message,true);}
     }
-    wireDz($('.dz',el),{accept:'.pdf,application/pdf',multiple:false,onFiles:setFile,match:isPdf,label:'a PDF file'});
+    wireDz($('.dz',el),{accept:'.pdf,application/pdf',multiple:false,onFiles:setFile,match:isPdf,label:T('a PDF file','file PDF')});
     on($('#pjGo',el),'click',async()=>{
-      if(!cur)return toast('Choose a PDF first.',true);
+      if(!cur)return toast(T('Choose a PDF first.','Pilih PDF dulu.'),true);
       const goBtn=$('#pjGo',el);
       try{
-        setBusy(goBtn,true,'Converting…');prog.show('Preparing…');
+        setBusy(goBtn,true,T('Converting…','Mengonversi…'));prog.show(T('Preparing…','Menyiapkan…'));
         const q=(+$('#pjQ',el).value)/100;
         const scale=+$('#pjScale',el).value;
         const base=baseName(cur.file.name);
@@ -621,13 +853,13 @@ TOOLS['pdf-to-jpg']={
             const r=110/pg.canvas.height;
             t.width=Math.max(1,Math.round(pg.canvas.width*r));t.height=110;
             t.getContext('2d').drawImage(pg.canvas,0,0,t.width,t.height);
-            const img=new Image();img.src=t.toDataURL('image/jpeg',.6);img.alt='Page '+pg.index;
+            const img=new Image();img.src=t.toDataURL('image/jpeg',.6);img.alt=T('Page ','Halaman ')+pg.index;
             thumbs.appendChild(img);
           }
         }});
         items.zipName=base+'-pages';
-        showResult(el,{title:items.length+' image'+(items.length>1?'s':'')+' ready',
-          stats:'Quality '+Math.round(q*100)+'% · total '+fmtBytes(items.reduce((s,i)=>s+i.blob.size,0)),items});
+        showResult(el,{title:T(items.length+' image'+(items.length>1?'s':'')+' ready',items.length+' gambar siap'),
+          stats:T('Quality ','Kualitas ')+Math.round(q*100)+'% · total '+fmtBytes(items.reduce((s,i)=>s+i.blob.size,0)),items});
       }catch(err){toast(err.message,true);}
       finally{setBusy(goBtn,false);prog.hide();}
     });
@@ -637,31 +869,31 @@ TOOLS['pdf-to-jpg']={
 
 /* ================= 5 · Images to PDF ================= */
 TOOLS['jpg-to-pdf']={
-  name:'Images to PDF',desc:'Pack photos and scans into one tidy PDF document.',match:isImg,
+  name:T('Images to PDF','Foto ke PDF'),desc:T('Pack photos and scans into one tidy PDF document.','Kumpulkan foto dan hasil scan jadi satu PDF.'),match:isImg,
   icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="11" height="11" rx="2"/><circle cx="6.8" cy="6.8" r="1.2"/><path d="m3 11.5 3-3 3 3"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>',
   mount(root,pre){
     const el=toolShell(this,
-      dzHtml('Choose images','JPG, PNG or WebP — drop them anywhere on this page')+
+      dzHtml(T('Choose images','Pilih gambar'),T('JPG, PNG or WebP. Drop them anywhere on this page.','JPG, PNG, atau WebP. Seret ke mana saja di halaman ini.'))+
       '<ul class="flist"></ul>'+
-      '<div class="opts"><div class="opt"><label>Page size</label><div class="radio-row">'+
-        '<label class="radio-pill"><input type="radio" name="ipSize" value="fit" checked>Match image</label>'+
-        '<label class="radio-pill"><input type="radio" name="ipSize" value="a4p">A4 portrait</label>'+
-        '<label class="radio-pill"><input type="radio" name="ipSize" value="a4l">A4 landscape</label>'+
+      '<div class="opts"><div class="opt"><label>'+T('Page size','Ukuran halaman')+'</label><div class="radio-row">'+
+        '<label class="radio-pill"><input type="radio" name="ipSize" value="fit" checked>'+T('Match image','Ikut ukuran foto')+'</label>'+
+        '<label class="radio-pill"><input type="radio" name="ipSize" value="a4p">'+T('A4 portrait','A4 tegak')+'</label>'+
+        '<label class="radio-pill"><input type="radio" name="ipSize" value="a4l">'+T('A4 landscape','A4 mendatar')+'</label>'+
       '</div></div>'+
-      '<div class="opt"><label>&nbsp;</label><label class="check"><input type="checkbox" id="ipMargin">Add a small margin</label></div></div>'+
-      '<div class="actions"><button class="btn btn-primary" id="ipGo" disabled>Make PDF</button></div>'+
+      '<div class="opt"><label>&nbsp;</label><label class="check"><input type="checkbox" id="ipMargin">'+T('Add a small margin','Tambah margin kecil')+'</label></div></div>'+
+      '<div class="actions"><button class="btn btn-primary" id="ipGo" disabled>'+T('Make PDF','Buat PDF')+'</button></div>'+
       progHtml()+resultHtml());
     root.appendChild(el);
     const state=[],prog=makeProg(el);
     const goBtn=$('#ipGo',el);
     const list=makeSortableList($('.flist',el),state,{onChange:sync});
-    function sync(){goBtn.disabled=!state.length;goBtn.textContent=state.length?'Make PDF from '+state.length+' image'+(state.length>1?'s':''):'Make PDF';}
+    function sync(){goBtn.disabled=!state.length;goBtn.textContent=state.length?T('Make PDF from '+state.length+' image'+(state.length>1?'s':''),'Buat PDF dari '+state.length+' gambar'):T('Make PDF','Buat PDF');}
     function addFiles(fs){fs.forEach(f=>state.push({file:f}));list.render();sync();}
-    wireDz($('.dz',el),{accept:'image/png,image/jpeg,image/webp',multiple:true,onFiles:addFiles,match:isImg,label:'JPG, PNG or WebP images'});
+    wireDz($('.dz',el),{accept:'image/png,image/jpeg,image/webp',multiple:true,onFiles:addFiles,match:isImg,label:T('JPG, PNG or WebP images','gambar JPG, PNG, atau WebP')});
     on(goBtn,'click',async()=>{
       if(!state.length)return;
       try{
-        setBusy(goBtn,true,'Building…');prog.show();
+        setBusy(goBtn,true,T('Building…','Membuat PDF…'));prog.show();
         await loadLib('pdfLib');
         const out=await PDFLib.PDFDocument.create();
         const A4=[595.28,841.89];
@@ -694,7 +926,7 @@ TOOLS['jpg-to-pdf']={
         }
         const blob=new Blob([await out.save()],{type:'application/pdf'});
         const name=state.length===1?baseName(state[0].file.name)+'.pdf':'images.pdf';
-        showResult(el,{title:'PDF ready',stats:state.length+' page'+(state.length>1?'s':'')+' · '+fmtBytes(blob.size),items:[{blob,name}]});
+        showResult(el,{title:T('PDF ready','PDF siap'),stats:state.length+T(' page'+(state.length>1?'s':''),' halaman')+' · '+fmtBytes(blob.size),items:[{blob,name}]});
       }catch(err){toast(err.message,true);}
       finally{setBusy(goBtn,false);prog.hide();}
     });
@@ -706,7 +938,7 @@ function loadImageEl(file){
     const url=URL.createObjectURL(file);
     const img=new Image();
     img.onload=()=>{res(img);setTimeout(()=>URL.revokeObjectURL(url),2000);};
-    img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('Could not read '+file.name+'. The image may be damaged.'));};
+    img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error(T('Could not read '+file.name+'. The image may be damaged.',file.name+' tidak bisa dibaca. Mungkin gambarnya rusak.')));};
     img.src=url;
   });
 }
@@ -724,32 +956,32 @@ async function drawToCanvas(file,{w,h,bg}){
   return c;
 }
 TOOLS['compress-image']={
-  name:'Compress image',desc:'Cut file size hard while keeping your photos sharp.',match:isImg,
+  name:T('Compress image','Kompres Foto'),desc:T('Cut file size hard while keeping your photos sharp.','Kecilkan ukuran foto tanpa terlihat pecah.'),match:isImg,
   icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 12h4M9.4 10.4 11 12l-1.6 1.6M17 12h-4M14.6 10.4 13 12l1.6 1.6"/></svg>',
   mount(root,pre){
     const el=toolShell(this,
-      dzHtml('Choose images','JPG, PNG or WebP — several at once is fine')+
+      dzHtml(T('Choose images','Pilih gambar'),T('JPG, PNG or WebP. Several at once is fine.','JPG, PNG, atau WebP. Boleh beberapa sekaligus.'))+
       '<ul class="flist"></ul>'+
-      '<div class="opts">'+optRange('ciQ','Quality',30,95,5,75,'%')+
-      '<div class="opt"><label for="ciFmt">Save as</label><select id="ciFmt">'+
-        '<option value="image/jpeg">JPG — smallest for photos</option>'+
-        (WEBP_OK?'<option value="image/webp">WebP — modern, small</option>':'')+
-        '<option value="keep">Keep original format</option></select></div>'+
-      '<div class="opt"><label for="ciMaxW">Max width (px, optional)</label><input type="number" id="ciMaxW" min="16" step="1" placeholder="e.g. 1920" style="width:150px"></div></div>'+
-      '<p class="note">JPG and WebP output also strips hidden metadata (EXIF: location, camera, date) — a small privacy win. PNG stays lossless, so use “Max width” or switch format to shrink it.</p>'+
-      '<div class="actions"><button class="btn btn-primary" id="ciGo" disabled>Compress</button></div>'+
+      '<div class="opts">'+optRange('ciQ',T('Quality','Kualitas'),30,95,5,75,'%')+
+      '<div class="opt"><label for="ciFmt">'+T('Save as','Simpan sebagai')+'</label><select id="ciFmt">'+
+        '<option value="image/jpeg">'+T('JPG (smallest for photos)','JPG (paling kecil untuk foto)')+'</option>'+
+        (WEBP_OK?'<option value="image/webp">'+T('WebP (modern, small)','WebP (modern, kecil)')+'</option>':'')+
+        '<option value="keep">'+T('Keep original format','Format asli')+'</option></select></div>'+
+      '<div class="opt"><label for="ciMaxW">'+T('Max width (px, optional)','Lebar maks. (px, opsional)')+'</label><input type="number" id="ciMaxW" min="16" step="1" placeholder="'+T('e.g. 1920','mis. 1920')+'" style="width:150px"></div></div>'+
+      '<p class="note">'+T('Saving as JPG or WebP also removes hidden EXIF data like location, camera and date. PNG is lossless, so shrink it with Max width or by switching format.','Menyimpan ke JPG atau WebP juga membuang data EXIF tersembunyi seperti lokasi, kamera, dan tanggal. PNG itu lossless, jadi kecilkan pakai Lebar maks. atau ganti formatnya.')+'</p>'+
+      '<div class="actions"><button class="btn btn-primary" id="ciGo" disabled>'+T('Compress','Kompres')+'</button></div>'+
       progHtml()+resultHtml());
     root.appendChild(el);
     const state=[],prog=makeProg(el),goBtn=$('#ciGo',el);
     wireRange(el,'ciQ',v=>v+'%');
     const list=makeSortableList($('.flist',el),state,{onChange:sync});
-    function sync(){goBtn.disabled=!state.length;goBtn.textContent=state.length?'Compress '+state.length+' image'+(state.length>1?'s':''):'Compress';}
+    function sync(){goBtn.disabled=!state.length;goBtn.textContent=state.length?T('Compress '+state.length+' image'+(state.length>1?'s':''),'Kompres '+state.length+' gambar'):T('Compress','Kompres');}
     function addFiles(fs){fs.forEach(f=>state.push({file:f}));list.render();sync();}
-    wireDz($('.dz',el),{accept:'image/png,image/jpeg,image/webp',multiple:true,onFiles:addFiles,match:isImg,label:'JPG, PNG or WebP images'});
+    wireDz($('.dz',el),{accept:'image/png,image/jpeg,image/webp',multiple:true,onFiles:addFiles,match:isImg,label:T('JPG, PNG or WebP images','gambar JPG, PNG, atau WebP')});
     on(goBtn,'click',async()=>{
       if(!state.length)return;
       try{
-        setBusy(goBtn,true,'Compressing…');prog.show();
+        setBusy(goBtn,true,T('Compressing…','Mengompres…'));prog.show();
         const q=(+$('#ciQ',el).value)/100;
         const fmtSel=$('#ciFmt',el).value;
         const maxW=parseInt($('#ciMaxW',el).value,10)||null;
@@ -775,8 +1007,8 @@ TOOLS['compress-image']={
         }
         items.zipName='compressed-images';
         const pct=Math.round(100*(before-after)/before);
-        showResult(el,{title:'Compressed',
-          stats:fmtBytes(before)+' → '+fmtBytes(after)+' · '+(after<before?'<span class="saving">−'+pct+'%</span>':'<span class="growing">no smaller — try JPG or a max width</span>'),
+        showResult(el,{title:T('Compressed','Selesai dikompres'),
+          stats:fmtBytes(before)+' → '+fmtBytes(after)+' · '+(after<before?'<span class="saving">−'+pct+'%</span>':'<span class="growing">'+T('no smaller, try JPG or a max width','tidak lebih kecil, coba JPG atau lebar maks.')+'</span>'),
           items});
       }catch(err){toast(err.message,true);}
       finally{setBusy(goBtn,false);prog.hide();}
@@ -787,27 +1019,27 @@ TOOLS['compress-image']={
 
 /* ================= 7 · Resize image ================= */
 TOOLS['resize-image']={
-  name:'Resize image',desc:'Scale pictures to exact pixels or a percentage.',match:isImg,
+  name:T('Resize image','Resize Foto'),desc:T('Scale pictures to exact pixels or a percentage.','Ubah ukuran gambar ke piksel atau persen.'),match:isImg,
   icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M3 3h4M3 3v4m0-4 4 4M21 21h-4m4 0v-4m0 4-4-4"/></svg>',
   mount(root,pre){
     const el=toolShell(this,
-      dzHtml('Choose images','JPG, PNG or WebP — several at once is fine')+
+      dzHtml(T('Choose images','Pilih gambar'),T('JPG, PNG or WebP. Several at once is fine.','JPG, PNG, atau WebP. Boleh beberapa sekaligus.'))+
       '<ul class="flist"></ul>'+
-      '<div class="opts"><div class="opt"><label>Resize by</label><div class="radio-row">'+
-        '<label class="radio-pill"><input type="radio" name="rzMode" value="px" checked>Pixels</label>'+
-        '<label class="radio-pill"><input type="radio" name="rzMode" value="pct">Percent</label></div></div>'+
-      '<div class="opt" id="rzWOpt"><label for="rzW">Width (px)</label><input type="number" id="rzW" min="1" placeholder="e.g. 1200" style="width:130px"></div>'+
-      '<div class="opt" id="rzHOpt"><label for="rzH">Height (px)</label><input type="number" id="rzH" min="1" placeholder="auto" style="width:130px"></div>'+
-      '<div class="opt" id="rzPOpt" style="display:none"><label for="rzP">Scale (%)</label><input type="number" id="rzP" min="1" max="500" value="50" style="width:110px"></div>'+
-      '<div class="opt" id="rzKOpt"><label>&nbsp;</label><label class="check"><input type="checkbox" id="rzKeep" checked>Keep proportions</label></div></div>'+
-      '<div class="actions"><button class="btn btn-primary" id="rzGo" disabled>Resize</button></div>'+
+      '<div class="opts"><div class="opt"><label>'+T('Resize by','Ubah berdasarkan')+'</label><div class="radio-row">'+
+        '<label class="radio-pill"><input type="radio" name="rzMode" value="px" checked>'+T('Pixels','Piksel')+'</label>'+
+        '<label class="radio-pill"><input type="radio" name="rzMode" value="pct">'+T('Percent','Persen')+'</label></div></div>'+
+      '<div class="opt" id="rzWOpt"><label for="rzW">'+T('Width (px)','Lebar (px)')+'</label><input type="number" id="rzW" min="1" placeholder="'+T('e.g. 1200','mis. 1200')+'" style="width:130px"></div>'+
+      '<div class="opt" id="rzHOpt"><label for="rzH">'+T('Height (px)','Tinggi (px)')+'</label><input type="number" id="rzH" min="1" placeholder="auto" style="width:130px"></div>'+
+      '<div class="opt" id="rzPOpt" style="display:none"><label for="rzP">'+T('Scale (%)','Skala (%)')+'</label><input type="number" id="rzP" min="1" max="500" value="50" style="width:110px"></div>'+
+      '<div class="opt" id="rzKOpt"><label>&nbsp;</label><label class="check"><input type="checkbox" id="rzKeep" checked>'+T('Keep proportions','Jaga proporsi')+'</label></div></div>'+
+      '<div class="actions"><button class="btn btn-primary" id="rzGo" disabled>'+T('Resize','Resize')+'</button></div>'+
       progHtml()+resultHtml());
     root.appendChild(el);
     const state=[],prog=makeProg(el),goBtn=$('#rzGo',el);
     const list=makeSortableList($('.flist',el),state,{onChange:sync});
-    function sync(){goBtn.disabled=!state.length;goBtn.textContent=state.length?'Resize '+state.length+' image'+(state.length>1?'s':''):'Resize';}
+    function sync(){goBtn.disabled=!state.length;goBtn.textContent=state.length?T('Resize '+state.length+' image'+(state.length>1?'s':''),'Resize '+state.length+' gambar'):'Resize';}
     function addFiles(fs){fs.forEach(f=>state.push({file:f}));list.render();sync();}
-    wireDz($('.dz',el),{accept:'image/png,image/jpeg,image/webp',multiple:true,onFiles:addFiles,match:isImg,label:'JPG, PNG or WebP images'});
+    wireDz($('.dz',el),{accept:'image/png,image/jpeg,image/webp',multiple:true,onFiles:addFiles,match:isImg,label:T('JPG, PNG or WebP images','gambar JPG, PNG, atau WebP')});
     $$('input[name="rzMode"]',el).forEach(r=>on(r,'change',()=>{
       const px=$('input[name="rzMode"]:checked',el).value==='px';
       $('#rzWOpt',el).style.display=px?'':'none';
@@ -822,10 +1054,10 @@ TOOLS['resize-image']={
       const H=parseInt($('#rzH',el).value,10)||null;
       const P=(parseFloat($('#rzP',el).value)||0)/100;
       const keep=$('#rzKeep',el).checked;
-      if(px&&!W&&!H)return toast('Enter a width or a height.',true);
-      if(!px&&(!P||P<=0))return toast('Enter a percentage above 0.',true);
+      if(px&&!W&&!H)return toast(T('Enter a width or a height.','Isi lebar atau tinggi dulu.'),true);
+      if(!px&&(!P||P<=0))return toast(T('Enter a percentage above 0.','Isi persentase di atas 0.'),true);
       try{
-        setBusy(goBtn,true,'Resizing…');prog.show();
+        setBusy(goBtn,true,T('Resizing…','Mengubah ukuran…'));prog.show();
         const items=[];let i=0;
         for(const it of state){
           const f=it.file;
@@ -851,7 +1083,7 @@ TOOLS['resize-image']={
           prog.set(++i,state.length,f.name);
         }
         items.zipName='resized-images';
-        showResult(el,{title:'Resized',stats:items.length+' image'+(items.length>1?'s':'')+' · total '+fmtBytes(items.reduce((s,x)=>s+x.blob.size,0)),items});
+        showResult(el,{title:T('Resized','Selesai di-resize'),stats:items.length+T(' image'+(items.length>1?'s':''),' gambar')+' · total '+fmtBytes(items.reduce((s,x)=>s+x.blob.size,0)),items});
       }catch(err){toast(err.message,true);}
       finally{setBusy(goBtn,false);prog.hide();}
     });
@@ -861,31 +1093,31 @@ TOOLS['resize-image']={
 
 /* ================= 8 · Convert image ================= */
 TOOLS['convert-image']={
-  name:'Convert image',desc:'Switch between JPG, PNG and WebP in one click.',match:isImg,
+  name:T('Convert image','Konversi Foto'),desc:T('Switch between JPG, PNG and WebP in one click.','Tukar format JPG, PNG, dan WebP sekali klik.'),match:isImg,
   icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 8A9 9 0 0 0 5 6.5L3.5 8M3.5 16a9 9 0 0 0 15.5 1.5l1.5-1.5"/><path d="M3.5 3.5V8H8M20.5 20.5V16H16"/></svg>',
   mount(root,pre){
     const el=toolShell(this,
-      dzHtml('Choose images','JPG, PNG or WebP — several at once is fine')+
+      dzHtml(T('Choose images','Pilih gambar'),T('JPG, PNG or WebP. Several at once is fine.','JPG, PNG, atau WebP. Boleh beberapa sekaligus.'))+
       '<ul class="flist"></ul>'+
-      '<div class="opts"><div class="opt"><label for="cvFmt">Convert to</label><select id="cvFmt">'+
+      '<div class="opts"><div class="opt"><label for="cvFmt">'+T('Convert to','Ubah ke')+'</label><select id="cvFmt">'+
         '<option value="image/jpeg">JPG</option><option value="image/png">PNG</option>'+
         (WEBP_OK?'<option value="image/webp">WebP</option>':'')+'</select></div>'+
-      optRange('cvQ','Quality',30,95,5,85,'%')+'</div>'+
-      (WEBP_OK?'':'<p class="note warn">Your browser can\u2019t save WebP, so that option is hidden. JPG and PNG work everywhere.</p>')+
-      '<p class="note">Converting to JPG places transparent areas on a white background. Quality applies to JPG and WebP; PNG is always lossless.</p>'+
-      '<div class="actions"><button class="btn btn-primary" id="cvGo" disabled>Convert</button></div>'+
+      optRange('cvQ',T('Quality','Kualitas'),30,95,5,85,'%')+'</div>'+
+      (WEBP_OK?'':'<p class="note warn">'+T('Your browser can\'t save WebP, so that option is hidden. JPG and PNG work everywhere.','Browser-mu tidak bisa menyimpan WebP, jadi opsinya disembunyikan. JPG dan PNG bisa di mana saja.')+'</p>')+
+      '<p class="note">'+T('JPG can\'t be transparent, so transparent areas get a white background. The quality slider only affects JPG and WebP. PNG is always lossless.','JPG tidak bisa transparan, jadi bagian transparan diberi latar putih. Slider kualitas hanya berlaku untuk JPG dan WebP. PNG selalu lossless.')+'</p>'+
+      '<div class="actions"><button class="btn btn-primary" id="cvGo" disabled>'+T('Convert','Konversi')+'</button></div>'+
       progHtml()+resultHtml());
     root.appendChild(el);
     const state=[],prog=makeProg(el),goBtn=$('#cvGo',el);
     wireRange(el,'cvQ',v=>v+'%');
     const list=makeSortableList($('.flist',el),state,{onChange:sync});
-    function sync(){goBtn.disabled=!state.length;goBtn.textContent=state.length?'Convert '+state.length+' image'+(state.length>1?'s':''):'Convert';}
+    function sync(){goBtn.disabled=!state.length;goBtn.textContent=state.length?T('Convert '+state.length+' image'+(state.length>1?'s':''),'Konversi '+state.length+' gambar'):T('Convert','Konversi');}
     function addFiles(fs){fs.forEach(f=>state.push({file:f}));list.render();sync();}
-    wireDz($('.dz',el),{accept:'image/png,image/jpeg,image/webp',multiple:true,onFiles:addFiles,match:isImg,label:'JPG, PNG or WebP images'});
+    wireDz($('.dz',el),{accept:'image/png,image/jpeg,image/webp',multiple:true,onFiles:addFiles,match:isImg,label:T('JPG, PNG or WebP images','gambar JPG, PNG, atau WebP')});
     on(goBtn,'click',async()=>{
       if(!state.length)return;
       try{
-        setBusy(goBtn,true,'Converting…');prog.show();
+        setBusy(goBtn,true,T('Converting…','Mengonversi…'));prog.show();
         const type=$('#cvFmt',el).value;
         const q=(+$('#cvQ',el).value)/100;
         const bg=type==='image/jpeg'?'#ffffff':null;
@@ -899,7 +1131,7 @@ TOOLS['convert-image']={
           prog.set(++i,state.length,it.file.name);
         }
         items.zipName='converted-images';
-        showResult(el,{title:'Converted to '+ext.toUpperCase(),stats:items.length+' file'+(items.length>1?'s':'')+' · total '+fmtBytes(items.reduce((s,x)=>s+x.blob.size,0)),items});
+        showResult(el,{title:T('Converted to ','Diubah ke ')+ext.toUpperCase(),stats:items.length+T(' file'+(items.length>1?'s':''),' file')+' · total '+fmtBytes(items.reduce((s,x)=>s+x.blob.size,0)),items});
       }catch(err){toast(err.message,true);}
       finally{setBusy(goBtn,false);prog.hide();}
     });
@@ -913,14 +1145,14 @@ async function heicMod(){
   if(_heif)return _heif;
   let m=libheif();
   if(m&&!m.HeifDecoder&&typeof m.then==='function')m=await m;
-  if(!m||!m.HeifDecoder)throw new Error('The HEIC decoder failed to start. Try reloading the page.');
+  if(!m||!m.HeifDecoder)throw new Error(T('The HEIC decoder failed to start. Try reloading the page.','Decoder HEIC gagal dijalankan. Coba muat ulang halaman.'));
   _heif=m;return _heif;
 }
 async function heicCanvases(bytes){
   const mod=await heicMod();
   let imgs=null;
   try{imgs=new mod.HeifDecoder().decode(bytes);}catch(err){imgs=null;}
-  if(!imgs||!imgs.length)throw new Error('This does not look like a readable HEIC photo.');
+  if(!imgs||!imgs.length)throw new Error(T('This doesn\'t look like a readable HEIC photo.','File ini sepertinya bukan foto HEIC yang bisa dibaca.'));
   const out=[];
   for(const img of imgs){
     const w=img.get_width(),h=img.get_height();
@@ -929,30 +1161,30 @@ async function heicCanvases(bytes){
     const ctx=c.getContext('2d');
     const data=ctx.createImageData(w,h);
     await new Promise((res,rej)=>{
-      try{img.display(data,d=>{if(!d)return rej(new Error('Could not decode this photo.'));ctx.putImageData(d,0,0);res();});}
-      catch(err){rej(new Error('Could not decode this photo.'));}
+      try{img.display(data,d=>{if(!d)return rej(new Error(T('Could not decode this photo.','Foto ini tidak bisa dibaca.')));ctx.putImageData(d,0,0);res();});}
+      catch(err){rej(new Error(T('Could not decode this photo.','Foto ini tidak bisa dibaca.')));}
     });
     try{img.free&&img.free();}catch(err){}
     out.push(c);
   }
   const ok=out.filter(Boolean);
-  if(!ok.length)throw new Error('Could not decode this photo.');
+  if(!ok.length)throw new Error(T('Could not decode this photo.','Foto ini tidak bisa dibaca.'));
   return ok;
 }
 TOOLS['heic-to-jpg']={
-  name:'HEIC to JPG',desc:'Convert iPhone photos to JPG that opens anywhere.',match:isHeic,
+  name:T('HEIC to JPG','HEIC ke JPG'),desc:T('Convert iPhone photos to JPG that opens anywhere.','Ubah foto iPhone (HEIC) jadi JPG biasa.'),match:isHeic,
   icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M10 5.2h4"/><path d="m8 15.5 2.6-2.6 2 2L15 12.5l1 1"/><circle cx="14.6" cy="9.4" r="1"/></svg>',
   mount(root,pre){
     const el=toolShell(this,
-      dzHtml('Choose HEIC photos','iPhone .heic or .heif — several at once is fine')+
+      dzHtml(T('Choose HEIC photos','Pilih foto HEIC'),T('iPhone .heic or .heif. Several at once is fine.','.heic atau .heif dari iPhone. Boleh beberapa sekaligus.'))+
       '<ul class="flist"></ul>'+
-      '<div class="opts"><div class="opt"><label for="hcFmt">Save as</label><select id="hcFmt">'+
-        '<option value="image/jpeg">JPG — opens everywhere</option>'+
-        '<option value="image/png">PNG — lossless, larger</option></select></div>'+
-      optRange('hcQ','JPG quality',60,95,5,88,'%')+'</div>'+
-      '<p class="note">The decoder (libheif) loads once, about 0.5 MB, then runs entirely on your device. Large photos take a few seconds each — that is your own processor working, not a server.</p>'+
-      '<div class="actions"><button class="btn btn-primary" id="hcGo" disabled>Convert</button>'+
-      '<button class="btn btn-ghost btn-sm" id="hcClear" hidden>Clear list</button></div>'+
+      '<div class="opts"><div class="opt"><label for="hcFmt">'+T('Save as','Simpan sebagai')+'</label><select id="hcFmt">'+
+        '<option value="image/jpeg">'+T('JPG (opens everywhere)','JPG (bisa dibuka di mana saja)')+'</option>'+
+        '<option value="image/png">'+T('PNG (lossless, larger)','PNG (lossless, lebih besar)')+'</option></select></div>'+
+      optRange('hcQ',T('JPG quality','Kualitas JPG'),60,95,5,88,'%')+'</div>'+
+      '<p class="note">'+T('The decoder (libheif, about 0.5 MB) loads once and then runs on your device. Big photos take a few seconds each because your own processor is doing the work.','Decoder-nya (libheif, sekitar 0,5 MB) dimuat sekali lalu jalan di perangkatmu. Foto besar butuh beberapa detik per foto karena prosesor perangkatmu sendiri yang bekerja.')+'</p>'+
+      '<div class="actions"><button class="btn btn-primary" id="hcGo" disabled>'+T('Convert','Konversi')+'</button>'+
+      '<button class="btn btn-ghost btn-sm" id="hcClear" hidden>'+T('Clear list','Kosongkan daftar')+'</button></div>'+
       progHtml()+resultHtml());
     root.appendChild(el);
     const state=[],prog=makeProg(el),goBtn=$('#hcGo',el),clearBtn=$('#hcClear',el);
@@ -960,11 +1192,11 @@ TOOLS['heic-to-jpg']={
     const list=makeSortableList($('.flist',el),state,{onChange:sync});
     function sync(){
       goBtn.disabled=!state.length;
-      goBtn.textContent=state.length?'Convert '+state.length+' photo'+(state.length>1?'s':''):'Convert';
+      goBtn.textContent=state.length?T('Convert '+state.length+' photo'+(state.length>1?'s':''),'Konversi '+state.length+' foto'):T('Convert','Konversi');
       clearBtn.hidden=!state.length;
     }
     function addFiles(fs){fs.forEach(f=>state.push({file:f}));list.render();sync();}
-    wireDz($('.dz',el),{accept:'.heic,.heif,image/heic,image/heif',multiple:true,onFiles:addFiles,match:isHeic,label:'HEIC or HEIF photos'});
+    wireDz($('.dz',el),{accept:'.heic,.heif,image/heic,image/heif',multiple:true,onFiles:addFiles,match:isHeic,label:T('HEIC or HEIF photos','foto HEIC atau HEIF')});
     on(clearBtn,'click',()=>{state.length=0;list.render();sync();});
     on(goBtn,'click',async()=>{
       if(!state.length)return;
@@ -972,8 +1204,8 @@ TOOLS['heic-to-jpg']={
       const q=(+$('#hcQ',el).value)/100;
       const ext=type==='image/png'?'png':'jpg';
       try{
-        setBusy(goBtn,true,'Converting…');
-        prog.show('Loading decoder (once, ~0.5 MB)…');
+        setBusy(goBtn,true,T('Converting…','Mengonversi…'));
+        prog.show(T('Loading the decoder (once, about 0.5 MB)…','Memuat decoder (sekali saja, sekitar 0,5 MB)…'));
         await loadLib('heic');
         const items=[];let done=0,failed=0;
         for(const it of state){
@@ -991,14 +1223,14 @@ TOOLS['heic-to-jpg']={
           }catch(err){failed++;toast(f.name+': '+err.message,true);}
           prog.set(++done,state.length,f.name);
         }
-        if(!items.length)throw new Error('None of these photos could be converted.');
+        if(!items.length)throw new Error(T('None of these photos could be converted.','Tidak ada foto yang bisa dikonversi.'));
         items.zipName='heic-converted';
         const total=items.reduce((s,x)=>s+x.blob.size,0);
         showResult(el,{
-          title:'Converted to '+ext.toUpperCase(),
-          stats:items.length+' photo'+(items.length>1?'s':'')+' · total '+fmtBytes(total),
+          title:T('Converted to ','Diubah ke ')+ext.toUpperCase(),
+          stats:items.length+T(' photo'+(items.length>1?'s':''),' foto')+' · total '+fmtBytes(total),
           items,
-          note:failed?failed+' photo'+(failed>1?'s':'')+' could not be read and were skipped.':''
+          note:failed?T(failed+' photo'+(failed>1?'s':'')+' could not be read and were skipped.',failed+' foto tidak bisa dibaca dan dilewati.'):''
         });
       }catch(err){toast(err.message,true);}
       finally{setBusy(goBtn,false);prog.hide();sync();}
@@ -1009,24 +1241,24 @@ TOOLS['heic-to-jpg']={
 
 /* ================= 9 · QR code ================= */
 TOOLS['qr-code']={
-  name:'QR code maker',desc:'Turn any link or text into a scannable code.',match:()=>false,
+  name:T('QR code maker','Buat QR Code'),desc:T('Turn any link or text into a scannable code.','Ubah link atau teks jadi kode siap scan.'),match:()=>false,
   icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM21 14v.01M14 21v.01M18 18h3v3h-3z"/></svg>',
   mount(root){
     const el=toolShell(this,
-      '<div class="field"><label for="qrText" style="font-size:.78rem;font-weight:700;letter-spacing:.02em;color:var(--muted);text-transform:uppercase">Link or text</label>'+
-      '<input type="text" id="qrText" placeholder="https://example.com or any text"></div>'+
-      '<div class="opts"><div class="opt"><label for="qrSize">Size</label><select id="qrSize"><option value="256">256 px — screens</option><option value="512" selected>512 px — print</option><option value="1024">1024 px — posters</option></select></div></div>'+
-      '<div class="actions"><button class="btn btn-primary" id="qrGo">Make QR code</button></div>'+
-      '<div class="qr-out"><div class="qr-frame"><img id="qrImg" alt="Generated QR code" width="220" height="220"></div>'+
+      '<div class="field"><label for="qrText" style="font-size:.78rem;font-weight:700;letter-spacing:.02em;color:var(--muted);text-transform:uppercase">'+T('Link or text','Link atau teks')+'</label>'+
+      '<input type="text" id="qrText" placeholder="'+T('https://example.com or any text','https://contoh.com atau teks apa saja')+'"></div>'+
+      '<div class="opts"><div class="opt"><label for="qrSize">'+T('Size','Ukuran')+'</label><select id="qrSize"><option value="256">'+T('256 px (screens)','256 px (layar)')+'</option><option value="512" selected>'+T('512 px (print)','512 px (cetak)')+'</option><option value="1024">'+T('1024 px (posters)','1024 px (poster)')+'</option></select></div></div>'+
+      '<div class="actions"><button class="btn btn-primary" id="qrGo">'+T('Make QR code','Buat QR code')+'</button></div>'+
+      '<div class="qr-out"><div class="qr-frame"><img id="qrImg" alt="'+T('Generated QR code','QR code yang dibuat')+'" width="220" height="220"></div>'+
       '<div class="actions" style="justify-content:center"><button class="btn btn-ghost" id="qrDl">'+I.dl+'Download PNG</button></div></div>');
     root.appendChild(el);
     let dataUrl=null;
     on($('#qrGo',el),'click',async()=>{
       const text=$('#qrText',el).value.trim();
-      if(!text)return toast('Type a link or some text first.',true);
+      if(!text)return toast(T('Type a link or some text first.','Ketik link atau teks dulu.'),true);
       const goBtn=$('#qrGo',el);
       try{
-        setBusy(goBtn,true,'Drawing…');
+        setBusy(goBtn,true,T('Drawing…','Membuat…'));
         await loadLib('qrcode');
         const size=+$('#qrSize',el).value;
         const holder=document.createElement('div');
@@ -1035,13 +1267,13 @@ TOOLS['qr-code']={
         new QRCode(holder,{text,width:size,height:size,colorDark:'#12151A',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
         await new Promise(r=>setTimeout(r,60));
         const canvas=holder.querySelector('canvas');
-        if(!canvas)throw new Error('Could not draw this code.');
+        if(!canvas)throw new Error(T('Could not draw this code.','Kode ini tidak bisa dibuat.'));
         dataUrl=canvas.toDataURL('image/png');
         holder.remove();
         $('#qrImg',el).src=dataUrl;
         $('.qr-out',el).classList.add('show');
       }catch(err){
-        toast(/overflow/i.test(String(err))?'That text is too long for one QR code — trim it a little.':(err.message||'Could not draw this code.'),true);
+        toast(/overflow/i.test(String(err))?T('That text is too long for one QR code. Trim it a little.','Teksnya terlalu panjang untuk satu QR code. Pendekkan sedikit.'):(err.message||T('Could not draw this code.','Kode ini tidak bisa dibuat.')),true);
       }finally{setBusy(goBtn,false);}
     });
     on($('#qrDl',el),'click',()=>{
@@ -1057,23 +1289,23 @@ TOOLS['qr-code']={
 
 /* ================= 10 · Password generator ================= */
 TOOLS['password-generator']={
-  name:'Password generator',desc:'Strong random passwords, made on your device.',match:()=>false,
+  name:T('Password generator','Generator Password'),desc:T('Strong random passwords, made on your device.','Password kuat dan acak, dibuat di perangkatmu.'),match:()=>false,
   icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="3.5"/><path d="M10.2 12.8 21 2M15 8l3.2 3.2M12 11l2 2"/></svg>',
   mount(root){
     const el=toolShell(this,
       '<div class="pw-out"><output id="pwOut" aria-live="polite"></output>'+
-      '<button class="mini-btn" id="pwNew" aria-label="New password" style="width:46px;height:auto">'+I.refresh+'</button>'+
-      '<button class="mini-btn" id="pwCopy" aria-label="Copy password" style="width:46px;height:auto">'+I.copy+'</button></div>'+
+      '<button class="mini-btn" id="pwNew" aria-label="'+T('New password','Password baru')+'" style="width:46px;height:auto">'+I.refresh+'</button>'+
+      '<button class="mini-btn" id="pwCopy" aria-label="'+T('Copy password','Salin password')+'" style="width:46px;height:auto">'+I.copy+'</button></div>'+
       '<div class="meter"><i id="pwBar"></i></div><p class="meter-label" id="pwLabel"></p>'+
-      '<div class="opts">'+optRange('pwLen','Length',8,64,1,16,'')+
-      '<div class="opt"><label>Include</label><div class="checks">'+
-        '<label class="check"><input type="checkbox" id="pwU" checked>Uppercase (A–Z)</label>'+
-        '<label class="check"><input type="checkbox" id="pwL" checked>Lowercase (a–z)</label>'+
-        '<label class="check"><input type="checkbox" id="pwD" checked>Digits (0–9)</label>'+
-        '<label class="check"><input type="checkbox" id="pwS" checked>Symbols (!@#$…)</label>'+
-        '<label class="check"><input type="checkbox" id="pwA" checked>Avoid look-alikes (l, 1, O, 0)</label>'+
+      '<div class="opts">'+optRange('pwLen',T('Length','Panjang'),8,64,1,16,'')+
+      '<div class="opt"><label>'+T('Include','Pakai')+'</label><div class="checks">'+
+        '<label class="check"><input type="checkbox" id="pwU" checked>'+T('Uppercase (A–Z)','Huruf besar (A–Z)')+'</label>'+
+        '<label class="check"><input type="checkbox" id="pwL" checked>'+T('Lowercase (a–z)','Huruf kecil (a–z)')+'</label>'+
+        '<label class="check"><input type="checkbox" id="pwD" checked>'+T('Digits (0–9)','Angka (0–9)')+'</label>'+
+        '<label class="check"><input type="checkbox" id="pwS" checked>'+T('Symbols (!@#$…)','Simbol (!@#$…)')+'</label>'+
+        '<label class="check"><input type="checkbox" id="pwA" checked>'+T('Avoid look-alikes (l, 1, O, 0)','Hindari karakter mirip (l, 1, O, 0)')+'</label>'+
       '</div></div></div>'+
-      '<p class="note">Generated with your browser\u2019s cryptographic random source. Nothing is stored or sent anywhere.</p>');
+      '<p class="note">'+T('Made with your browser\'s cryptographic random generator. It isn\'t stored or sent anywhere.','Dibuat dengan pengacak kriptografis bawaan browser. Tidak disimpan dan tidak dikirim ke mana pun.')+'</p>');
     root.appendChild(el);
     const SETS={
       U:{full:'ABCDEFGHIJKLMNOPQRSTUVWXYZ',safe:'ABCDEFGHJKLMNPQRSTUVWXYZ'},
@@ -1101,10 +1333,10 @@ TOOLS['password-generator']={
       const pw=chars.slice(0,len).join('');
       $('#pwOut',el).textContent=pw;
       const bits=Math.round(len*Math.log2(all.length));
-      const tier=bits<45?['Weak','var(--danger)',25]:bits<70?['Fair','var(--warn)',50]:bits<100?['Strong','var(--ok)',78]:['Excellent','var(--ok)',100];
+      const tier=bits<45?[T('Weak','Lemah'),'var(--danger)',25]:bits<70?[T('Fair','Lumayan'),'var(--warn)',50]:bits<100?[T('Strong','Kuat'),'var(--ok)',78]:[T('Excellent','Sangat kuat'),'var(--ok)',100];
       $('#pwBar',el).style.width=tier[2]+'%';
       $('#pwBar',el).style.background=tier[1];
-      $('#pwLabel',el).textContent='Entropy \u2248 '+bits+' bits \u2014 '+tier[0];
+      $('#pwLabel',el).textContent=T('Entropy','Entropi')+' \u2248 '+bits+' bit · '+tier[0];
     }
     wireRange(el,'pwLen');
     on($('#pwLen',el),'input',generate);
@@ -1112,8 +1344,8 @@ TOOLS['password-generator']={
     on($('#pwNew',el),'click',generate);
     on($('#pwCopy',el),'click',async()=>{
       const pw=$('#pwOut',el).textContent;
-      try{await navigator.clipboard.writeText(pw);toast('Copied to clipboard');}
-      catch(e){toast('Copy blocked by browser — select the password and copy manually.',true);}
+      try{await navigator.clipboard.writeText(pw);toast(T('Copied','Tersalin'));}
+      catch(e){toast(T('Your browser blocked copying. Select the password and copy it yourself.','Browser memblokir salin otomatis. Pilih password-nya lalu salin manual.'),true);}
     });
     generate();
   }
@@ -1121,26 +1353,26 @@ TOOLS['password-generator']={
 
 /* ================= 11 · Word counter ================= */
 TOOLS['word-counter']={
-  name:'Word counter',desc:'Words, characters and reading time as you type.',match:()=>false,
+  name:T('Word counter','Penghitung Kata'),desc:T('Words, characters and reading time as you type.','Kata, karakter, dan waktu baca secara live.'),match:()=>false,
   icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 11h16M4 16h8"/><path d="m15.5 17.5 2 2L21 16"/></svg>',
   mount(root){
     const el=toolShell(this,
-      '<div class="field"><textarea id="wcText" placeholder="Paste or type your text here…" aria-label="Text to analyze"></textarea></div>'+
+      '<div class="field"><textarea id="wcText" placeholder="'+T('Paste or type your text here…','Tempel atau ketik teks di sini…')+'" aria-label="'+T('Text to analyze','Teks yang dihitung')+'"></textarea></div>'+
       '<div class="stats">'+
-        '<div class="stat"><b id="stWords">0</b><span>Words</span></div>'+
-        '<div class="stat"><b id="stChars">0</b><span>Characters</span></div>'+
-        '<div class="stat"><b id="stNoSp">0</b><span>No spaces</span></div>'+
-        '<div class="stat"><b id="stSent">0</b><span>Sentences</span></div>'+
-        '<div class="stat"><b id="stPara">0</b><span>Paragraphs</span></div>'+
-        '<div class="stat"><b id="stUniq">0</b><span>Unique words</span></div>'+
-        '<div class="stat"><b id="stRead">0 s</b><span>Reading time</span></div>'+
-        '<div class="stat"><b id="stSpeak">0 s</b><span>Speaking time</span></div>'+
+        '<div class="stat"><b id="stWords">0</b><span>'+T('Words','Kata')+'</span></div>'+
+        '<div class="stat"><b id="stChars">0</b><span>'+T('Characters','Karakter')+'</span></div>'+
+        '<div class="stat"><b id="stNoSp">0</b><span>'+T('No spaces','Tanpa spasi')+'</span></div>'+
+        '<div class="stat"><b id="stSent">0</b><span>'+T('Sentences','Kalimat')+'</span></div>'+
+        '<div class="stat"><b id="stPara">0</b><span>'+T('Paragraphs','Paragraf')+'</span></div>'+
+        '<div class="stat"><b id="stUniq">0</b><span>'+T('Unique words','Kata unik')+'</span></div>'+
+        '<div class="stat"><b id="stRead">0'+T(' s',' dtk')+'</b><span>'+T('Reading time','Waktu baca')+'</span></div>'+
+        '<div class="stat"><b id="stSpeak">0'+T(' s',' dtk')+'</b><span>'+T('Speaking time','Waktu bicara')+'</span></div>'+
       '</div>');
     root.appendChild(el);
     function timeFmt(words,wpm){
       if(!words)return '0 s';
       const s=Math.max(1,Math.round(words/wpm*60));
-      return s<60?s+' s':Math.round(s/60)+' min';
+      return s<60?s+T(' s',' dtk'):Math.round(s/60)+T(' min',' mnt');
     }
     function update(){
       const t=$('#wcText',el).value;
@@ -1162,19 +1394,19 @@ TOOLS['word-counter']={
 
 /* ================= 12 · Signature maker ================= */
 TOOLS['signature']={
-  name:'Signature maker',desc:'Draw a signature and save it as a transparent PNG.',match:()=>false,
+  name:T('Signature maker','Tanda Tangan'),desc:T('Draw a signature and save it as a transparent PNG.','Gambar tanda tangan, unduh PNG transparan.'),match:()=>false,
   icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m14.5 4.5 5 5L8 21H3v-5z"/><path d="m12.5 6.5 5 5"/></svg>',
   mount(root){
     const el=toolShell(this,
-      '<div class="sig-wrap"><canvas id="sigCanvas"></canvas><div class="sig-hint" id="sigHint">Sign here — mouse, finger or stylus</div></div>'+
-      '<div class="opts"><div class="opt"><label>Pen</label><div class="radio-row">'+
-        '<label class="radio-pill"><input type="radio" name="sigColor" value="#12151A" checked>Black ink</label>'+
-        '<label class="radio-pill"><input type="radio" name="sigColor" value="#1B3FBF">Blue ink</label></div></div>'+
-      optRange('sigSize','Thickness',1,7,0.5,2.5,'')+
-      '<div class="opt"><label>&nbsp;</label><label class="check"><input type="checkbox" id="sigBg">White background</label></div></div>'+
-      '<div class="actions"><button class="btn btn-primary" id="sigDl">'+I.dl+'Download PNG</button>'+
-      '<button class="btn btn-ghost btn-sm" id="sigUndo">Undo</button>'+
-      '<button class="btn btn-ghost btn-sm" id="sigClear">Clear</button></div>');
+      '<div class="sig-wrap"><canvas id="sigCanvas"></canvas><div class="sig-hint" id="sigHint">'+T('Sign here with a mouse, finger or stylus','Tanda tangan di sini pakai jari, mouse, atau stylus')+'</div></div>'+
+      '<div class="opts"><div class="opt"><label>'+T('Pen','Pena')+'</label><div class="radio-row">'+
+        '<label class="radio-pill"><input type="radio" name="sigColor" value="#12151A" checked>'+T('Black ink','Tinta hitam')+'</label>'+
+        '<label class="radio-pill"><input type="radio" name="sigColor" value="#1B3FBF">'+T('Blue ink','Tinta biru')+'</label></div></div>'+
+      optRange('sigSize',T('Thickness','Ketebalan'),1,7,0.5,2.5,'')+
+      '<div class="opt"><label>&nbsp;</label><label class="check"><input type="checkbox" id="sigBg">'+T('White background','Latar putih')+'</label></div></div>'+
+      '<div class="actions"><button class="btn btn-primary" id="sigDl">'+I.dl+T('Download PNG','Unduh PNG')+'</button>'+
+      '<button class="btn btn-ghost btn-sm" id="sigUndo">'+T('Undo','Urungkan')+'</button>'+
+      '<button class="btn btn-ghost btn-sm" id="sigClear">'+T('Clear','Hapus')+'</button></div>');
     root.appendChild(el);
     const wrap=$('.sig-wrap',el),cv=$('#sigCanvas',el),ctx=cv.getContext('2d');
     const strokes=[];let cur=null,cssW=0,cssH=0;
@@ -1219,7 +1451,7 @@ TOOLS['signature']={
     on($('#sigUndo',el),'click',()=>{strokes.pop();redraw();});
     on($('#sigClear',el),'click',()=>{strokes.length=0;redraw();});
     on($('#sigDl',el),'click',async()=>{
-      if(!strokes.length)return toast('Draw your signature first.',true);
+      if(!strokes.length)return toast(T('Draw your signature first.','Buat tanda tangannya dulu.'),true);
       const ex=document.createElement('canvas');
       ex.width=cssW*2;ex.height=cssH*2;
       const c=ex.getContext('2d');c.scale(2,2);
@@ -1233,6 +1465,16 @@ TOOLS['signature']={
     sizeCanvas();
   }
 };
+
+/* ================= home dock: pick files -> route to a tool ================= */
+(function(){
+  const dz=$('#heroDz');if(!dz)return;
+  const inp=dz.querySelector('input');
+  inp.multiple=true;inp.accept='.pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/*';
+  on(dz,'click',()=>inp.click());
+  on(dz,'keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();inp.click();}});
+  on(inp,'change',()=>{const fs=Array.from(inp.files);inp.value='';if(fs.length)openChooser(fs);});
+})();
 
 /* ================= boot ================= */
 applyTheme();
