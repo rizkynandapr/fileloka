@@ -12,3 +12,5 @@ jobs:
         working-directory: tests
       - run: npm test
         working-directory: tests
+      - name: Generated pages are in sync with scripts/
+        run: python3 scripts/generate_tool_pages.py && git diff --exit-code

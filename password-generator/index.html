@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-ping="1">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -27,7 +27,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 <link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=af723671b8">
+<link rel="stylesheet" href="/styles.css?v=9e4b757b98">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Password generator | Fileloka", "url": "https://fileloka.id/password-generator/", "inLanguage": "en", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any (web browser)", "browserRequirements": "Requires JavaScript", "isAccessibleForFree": true, "description": "Free strong password generator that runs on your device. Cryptographically random, adjustable length and characters, entropy shown in bits.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Fileloka", "url": "https://fileloka.id/"}}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "inLanguage": "en", "mainEntity": [{"@type": "Question", "name": "Is this generator actually secure?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It uses crypto.getRandomValues, the same randomness source password managers rely on, with unbiased sampling, and it makes sure every character type you picked shows up. The code is open source if you want to check."}}, {"@type": "Question", "name": "What do the entropy bits mean?", "acceptedAnswer": {"@type": "Answer", "text": "Entropy is a measure of how hard a password is to brute force. Roughly, 45 bits is weak, 70 is fair and 100 or more is excellent. A 16 character password using every character type comes out around 100 bits."}}, {"@type": "Question", "name": "Is my password stored or sent anywhere?", "acceptedAnswer": {"@type": "Answer", "text": "No. It's created in your browser's memory and only exists on your screen and clipboard. Refresh the page and it's gone."}}, {"@type": "Question", "name": "Should I avoid look-alike characters?", "acceptedAnswer": {"@type": "Answer", "text": "Turn it on for passwords you'll read and type yourself, like Wi-Fi or a TV login. For passwords that live in a password manager, leave it off for a slightly bigger pool of characters."}}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://fileloka.id/"}, {"@type": "ListItem", "position": 2, "name": "Password generator", "item": "https://fileloka.id/password-generator/"}]}</script>
@@ -60,7 +60,7 @@
 <li>Copy it. Changing any setting makes a fresh one.</li>
     </ol>
   </section>
-  <aside class="ad-slot" aria-label="Advertisement"><span>Advertisement</span><small>This one ad pays for the hosting.</small></aside>
+  
   <section class="section faq">
     <h2>Questions about this tool</h2>
 <details>
@@ -97,14 +97,17 @@
       <nav>
         <a href="/">Home</a>
         <a href="/#faq">FAQ</a>
-        <a href="/#privacy">Privacy</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/about/">About</a>
+        <a href="/contact/">Contact</a>
+        <a href="/terms/">Terms</a>
         <a href="/id/" hreflang="id">Bahasa Indonesia</a>
-        <a href="https://github.com/rizkynandapr/tooldock" rel="noopener">GitHub</a>
+        <a href="https://github.com/rizkynandapr/fileloka" rel="noopener">GitHub</a>
       </nav>
     </div>
   </div>
 </footer>
 <div class="toasts" id="toasts" aria-live="polite"></div>
-<script src="/app.js?v=4f706c9611" defer></script>
+<script src="/app.js?v=1a83fc7e9a" defer></script>
 </body>
 </html>

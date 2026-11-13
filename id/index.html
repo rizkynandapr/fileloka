@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id">
+<html lang="id" data-ping="1">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -27,7 +27,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 <link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=af723671b8">
+<link rel="stylesheet" href="/styles.css?v=9e4b757b98">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Fileloka", "url": "https://fileloka.id/id/", "inLanguage": "id", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any (web browser)", "browserRequirements": "Requires JavaScript", "isAccessibleForFree": true, "description": "Alat PDF dan foto gratis: kompres, gabung, dan pisah PDF, ubah foto ke PDF, kompres foto, WebP ke JPG, dan lainnya. Semua diproses di perangkatmu, file tidak di-upload.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Fileloka", "url": "https://fileloka.id/"}}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Fileloka", "url": "https://fileloka.id/id/", "inLanguage": "id"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "inLanguage": "id", "mainEntity": [{"@type": "Question", "name": "Beneran gratis? Ada batasnya?", "acceptedAnswer": {"@type": "Answer", "text": "Gratis. Kamu tidak perlu akun, hasilnya tidak diberi watermark, dan tidak ada batas pemakaian harian. Ukuran file juga tidak dibatasi secara sengaja. Batasnya cuma kemampuan perangkatmu, karena memang perangkatmu yang bekerja."}}, {"@type": "Question", "name": "Bagaimana saya tahu file saya tidak di-upload?", "acceptedAnswer": {"@type": "Answer", "text": "Ada dua cara. Buka DevTools di browser, tab Network, lalu pakai salah satu alat: tidak ada permintaan yang membawa file. Atau, setelah halaman terbuka, nyalakan mode pesawat. Alatnya tetap jalan. Kode sumbernya juga terbuka di GitHub."}}, {"@type": "Question", "name": "Bisa kompres PDF ke ukuran tertentu, misalnya 200 KB?", "acceptedAnswer": {"@type": "Answer", "text": "Bisa. Buka Kompres PDF, pilih Target ukuran, lalu klik 100 KB, 200 KB, 500 KB, atau 1 MB. Bisa juga ketik angka sendiri. Fileloka mencarikan kualitas terbaik yang masih muat di bawahnya."}}, {"@type": "Question", "name": "Bisa dipakai di HP?", "acceptedAnswer": {"@type": "Answer", "text": "Bisa. Semua alat jalan di browser HP (Chrome atau Safari) tanpa install apa-apa. Untuk PDF yang sangat besar laptop memang lebih cepat, tapi untuk pemakaian sehari-hari HP sudah lancar."}}, {"@type": "Question", "name": "PDF yang dikunci password bisa diproses?", "acceptedAnswer": {"@type": "Answer", "text": "Belum. File terkunci akan diberi tanda dan dilewati, bukan diproses setengah jalan. Buka kuncinya dulu, baru proses di sini."}}, {"@type": "Question", "name": "Boleh dipakai untuk kerjaan atau usaha?", "acceptedAnswer": {"@type": "Answer", "text": "Boleh. Justru karena filenya tidak di-upload, Fileloka lebih cocok untuk dokumen kantor dan berkas klien dibanding situs yang menyimpan file di server mereka."}}]}</script>
@@ -155,7 +155,7 @@
       <div class="rel-links"><a class="rel-link size" href="/id/kompres-pdf-100kb/">100 KB</a><a class="rel-link size" href="/id/kompres-pdf-200kb/">200 KB</a><a class="rel-link size" href="/id/kompres-pdf-300kb/">300 KB</a><a class="rel-link size" href="/id/kompres-pdf-500kb/">500 KB</a><a class="rel-link size" href="/id/kompres-pdf-1mb/">1 MB</a><a class="rel-link size" href="/id/kompres-pdf-2mb/">2 MB</a></div>
     </section>
 
-    <aside class="ad-slot" aria-label="Iklan"><span>Iklan</span><small>Satu iklan ini yang membayar biaya hosting.</small></aside>
+    
 
     <section class="section" id="why">
       <h2>Kebalikan dari situs sejenis</h2>
@@ -192,7 +192,7 @@
 
     <section class="section" id="privacy">
       <h2>Soal privasi, singkatnya</h2>
-      <p class="fineprint">Filemu diproses di browser dan tidak pernah sampai ke kami. Situs ini tidak memakai akun, cookie, atau analytics. Kalau nanti ada iklan, penyedia iklannya mungkin memasang cookie sendiri, tapi itu tidak pernah menyentuh filemu. Ada pertanyaan? <a href="mailto:rizkynandapr@gmail.com">rizkynandapr@gmail.com</a>.</p>
+      <p class="fineprint">Filemu diproses di browser dan tidak pernah sampai ke kami. Situs ini tidak memakai akun atau cookie. Kami menghitung kunjungan halaman dan pemakaian alat secara anonim, tanpa alamat IP dan tanpa data apa pun soal filemu. Detailnya ada di <a href="/id/privacy/">halaman privasi</a>. Ada pertanyaan? <a href="mailto:rizkynandapr@gmail.com">rizkynandapr@gmail.com</a>.</p>
     </section>
   </div>
 </section>
@@ -212,14 +212,17 @@
       <nav>
         <a href="/id/">Beranda</a>
         <a href="/id/#faq">FAQ</a>
-        <a href="/id/#privacy">Privasi</a>
+        <a href="/id/privacy/">Privasi</a>
+        <a href="/id/about/">Tentang</a>
+        <a href="/id/contact/">Kontak</a>
+        <a href="/id/terms/">Ketentuan</a>
         <a href="/" hreflang="en">English</a>
-        <a href="https://github.com/rizkynandapr/tooldock" rel="noopener">GitHub</a>
+        <a href="https://github.com/rizkynandapr/fileloka" rel="noopener">GitHub</a>
       </nav>
     </div>
   </div>
 </footer>
 <div class="toasts" id="toasts" aria-live="polite"></div>
-<script src="/app.js?v=4f706c9611" defer></script>
+<script src="/app.js?v=1a83fc7e9a" defer></script>
 </body>
 </html>
