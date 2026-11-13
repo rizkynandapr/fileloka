@@ -17,7 +17,7 @@ E = html.escape
 # "id" falls back to "en" when empty. A local wallet page (Saweria, Trakteer)
 # converts better for Indonesian visitors than a USD checkout.
 SUPPORT_URL = {
-    "en": "",   # e.g. "https://rizkynandapr.gumroad.com/l/support-fileloka"
+    "en": "https://rizkynandapr.gumroad.com/coffee",   # Gumroad tip page (pay what you want)
     "id": "",   # e.g. "https://saweria.co/yourname"
 }
 
