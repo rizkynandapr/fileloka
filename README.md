@@ -2,7 +2,7 @@
 
 ![tests](https://github.com/rizkynandapr/fileloka/actions/workflows/test.yml/badge.svg)
 
-A single-file, production-ready website in the iLovePDF category, with one structural difference that doubles as its security model and its marketing angle: **every tool runs 100% client-side.** Files are never uploaded — there is no backend at all.
+A single-file, production-ready website in the iLovePDF category, with one structural difference that doubles as its security model and its marketing angle: **every tool runs 100% client-side.** Files are never uploaded — no backend ever touches a file. (The only server-side code is a 60-line counter endpoint, `functions/api/e.js`, that receives anonymous page and tool counts.)
 
 **Deliverables:** `index.html` (the entire site), `vercel.json` (security headers), this README.
 
@@ -52,7 +52,7 @@ Deliberately **excluded** (need a server or heavy WASM): PDF↔Word/Excel, OCR, 
   - `libheif-js@1.18.2` (asm.js) — decode HEIC/HEIF
   - Image tools use the native Canvas API — no library.
 - **Signature UX features:** drop a file *anywhere* on the page and Fileloka suggests matching tools; hash routing (`#/merge-pdf`) makes every tool linkable; dark mode; `/` to search; keyboard + reduced-motion + focus-visible accessibility.
-- No `localStorage`/`sessionStorage`, no cookies, no analytics, **zero third-party requests** (fonts are self-hosted in `/fonts/`, OFL).
+- No `localStorage`/`sessionStorage`, no cookies, **zero third-party requests** (fonts are self-hosted in `/fonts/`, OFL). Usage is counted first-party and anonymously through `/api/e` (no IP, no visitor id, nothing about files; off under Do Not Track / GPC). Switch: `ANALYTICS` in `scripts/monetize.py`.
 
 **Design system v3 “Instrument” (Sep 2026):** futuristic-light. Cool paper `#EDF0F3` / ink `#0A0F1A` / electric indigo `#3A2EF0` (interaction) / signal lime `#C4EE2F` (success, savings). Type = Geist + Geist Mono, self-hosted variable woff2 (~52 KB total). Signature elements: HUD corner brackets on the home drop dock, mono read-outs, and the **before→after size meter** in Compress PDF results. Full dark theme.
 
@@ -83,14 +83,14 @@ Checklist status:
 | Encrypted/corrupt PDFs rejected with a clear message, never half-processed | ✅ tested |
 | EXIF metadata stripped on JPG/WebP re-encode (privacy bonus, stated in UI) | ✅ |
 | Object URLs revoked after download; canvases zeroed after use (memory hygiene) | ✅ |
-| No storage APIs, no cookies, no trackers | ✅ |
+| No storage APIs, no cookies, no third-party trackers; first-party counters store no IP or visitor id | ✅ tested (`tests/beacon.test.mjs`) |
 | Honest privacy note + contact placeholder in-page | ✅ (replace the email before launch) |
 
 **Before launch (see SECURITY.md for the full runbook):**
 1. Replace `rizkynandapr@gmail.com` with a real address (page footer + `.well-known/security.txt`).
 2. Lock down the *accounts* (GitHub/Vercel/registrar 2FA, registrar lock, DNSSEC) — for a hardened static site, account takeover is the #1 residual risk.
 3. ~~Self-host fonts~~ — **done in v3** (Geist, `/fonts/`); CSP is now `font-src 'self'`.
-4. When you add AdSense later, you will consciously loosen the CSP for Google's domains — the current CSP correctly blocks ads until you do.
+4. Serving AdSense ads later means replacing the allowlist CSP with Google's nonce-based one on ad pages — a deliberate trade-off, spelled out in MONETIZATION.md §5. The ownership meta tag and `ads.txt` (enough for AdSense review) need no CSP change.
 
 ---
 
@@ -120,7 +120,7 @@ Checklist status:
 
 **Honest math:** display-ad RPM for utility sites is roughly **$1–4** (higher in US/EU traffic, lower in ID/IN). Revenue = traffic × RPM, so the site earns meaningfully only after SEO traffic compounds. iLovePDF's own model (freemium + one small banner) is the proven endgame.
 
-- **Stage 1 — now:** two clearly-labeled ad slots are already in the layout (search `AD SLOT` in `index.html`). Apply for **Google AdSense** once you have a custom domain + the privacy note (already in-page) + some traffic. Keep exactly one visible ad per view — it's part of the brand ("one ad keeps every tool free").
+- **Stage 1 — shipped (Nov 2026):** one money slot per page (support box or a labelled sponsored offer), a support line shown right after a tool finishes, first-party counters, the trust pages ad networks ask for (`/privacy/`, `/about/`, `/contact/`, `/terms/`), and AdSense ownership verification. All of it is configured in `scripts/monetize.py`; **[MONETIZATION.md](MONETIZATION.md) is the runbook** (what to switch on, in which order, and what each step costs). Keep exactly one slot per view.
 - **Stage 2 — affiliate (higher RPM than display):** the audience is privacy-minded → VPN, password managers, and cloud-storage affiliate programs fit natively (e.g., a tasteful card under the password generator). 
 - **Stage 3 — Pro tier ($2–4/mo):** batch processing, larger-file workflows, OCR and PDF↔Word (these genuinely need compute, so people accept paying), no ads. Payment via Stripe/Paddle or, for the Indonesian market, Midtrans/Xendit.
 - **Stage 4 — API/embed** (iLovePDF's backlink flywheel): a free embeddable widget that links back = SEO engine.

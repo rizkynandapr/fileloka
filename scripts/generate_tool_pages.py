@@ -3,6 +3,8 @@
 
 Outputs (all committed; deploy stays a plain static upload):
   /index.html, /id/index.html                 home pages (EN / ID)
+  /privacy/ /about/ /contact/ /terms/ (+ /id/)  trust pages (content_pages.py)
+  /ads.txt                                    only when monetize.ADSENSE_CLIENT is set
   /<tool>/, /id/<tool>/                       13 tools × 2 languages
   /compress-pdf-to-<size>/, /id/kompres-pdf-<size>/   target-size landings
   /404.html, /sitemap.xml, /robots.txt
@@ -15,10 +17,12 @@ from content_en import P
 from content_id import P_ID, NAMES, CARD_DESC_ID, UI, HOME_ID
 from content_sizes import SIZES, slug as size_slug, page as size_page
 from cards import ICONS, CATS, KEYS, CARD_DESC_EN
+import monetize as M
+import content_pages as CP
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOMAIN = "https://fileloka.id"
-TODAY = "2026-09-23"
+TODAY = "2026-11-13"
 CONTACT = "rizkynandapr@gmail.com"
 ORDER = ["compress-pdf", "merge-pdf", "split-pdf", "pdf-to-jpg", "jpg-to-pdf", "heic-to-jpg",
          "compress-image", "resize-image", "convert-image", "qr-code", "password-generator",
@@ -27,6 +31,7 @@ CONTENT = {"en": P, "id": P_ID}
 PREFIX = {"en": "", "id": "id/"}
 LOCALE = {"en": "en_US", "id": "id_ID"}
 E = html.escape
+PING_ATTR = ' data-ping="1"' if M.ANALYTICS else ""
 
 def asset_ver(name):
     with open(os.path.join(ROOT, name), "rb") as f:
@@ -50,14 +55,14 @@ TXT = {
             sizes_lead="Upload forms reject anything over their limit. Pick the number they ask for and Fileloka fits your PDF under it.",
             foot="© 2026 Fileloka. Every tool runs on your device.", crumbs="Breadcrumb",
             chooser=("Got it.", "What do you want to do with these files?", "Cancel"),
-            overlay="Let go and we'll suggest a tool", ad=("Advertisement", "This one ad pays for the hosting."),
+            overlay="Let go and we'll suggest a tool",
             all_sizes="Other targets", tool_404="Page not found"),
  "id": dict(pill="Lokal · 0 upload", home="Beranda", tools="Alat", faq="FAQ", privacy="Privasi",
             theme="Ganti tema warna", lang_label="English", sizes_h="Kompres ke ukuran pasti",
             sizes_lead="Formulir online menolak file yang lewat batas. Pilih angka yang diminta, Fileloka yang mengepaskan PDF-mu di bawahnya.",
             foot="© 2026 Fileloka. Semua alat jalan di perangkatmu.", crumbs="Navigasi",
             chooser=("Oke.", "File ini mau diapakan?", "Batal"),
-            overlay="Lepaskan, nanti kami sarankan alatnya", ad=("Iklan", "Satu iklan ini yang membayar biaya hosting."),
+            overlay="Lepaskan, nanti kami sarankan alatnya",
             all_sizes="Target lain", tool_404="Halaman tidak ditemukan"),
 }
 
@@ -67,7 +72,7 @@ def head(lang, title, meta, url, alts, ld, extra=""):
     lds = ld if isinstance(ld, list) else [ld]
     ld_html = "\n".join(f'<script type="application/ld+json">{json.dumps(x, ensure_ascii=False)}</script>' for x in lds)
     return f"""<!doctype html>
-<html lang="{lang}">
+<html lang="{lang}"{PING_ATTR}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -94,7 +99,7 @@ def head(lang, title, meta, url, alts, ld, extra=""):
 <link rel="manifest" href="/site.webmanifest">
 <link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/styles.css?v={V_CSS}">
-{ld_html}{extra}
+{ld_html}{extra}{M.head_extra()}
 </head>"""
 
 def topbar(lang, twin):
@@ -119,6 +124,7 @@ def footer(lang):
     sizes = "".join(f'<li><a href="/{size_slug(lang,k)}/">{E(("Kompres PDF " if lang=="id" else "Compress PDF to ")+lab)}</a></li>' for k, _, lab in SIZES)
     home = "/" if lang == "en" else "/id/"
     other = ("/id/", "Bahasa Indonesia") if lang == "en" else ("/", "English")
+    info = "\n        ".join(f'<a href="/{pre}{s}/">{CP.NAV[lang][s]}</a>' for s in CP.ORDER)
     return f"""<footer>
   <div class="wrap">
     <ul class="foot-tools">{tools}{sizes}</ul>
@@ -127,9 +133,9 @@ def footer(lang):
       <nav>
         <a href="{home}">{t['home']}</a>
         <a href="{home}#faq">{t['faq']}</a>
-        <a href="{home}#privacy">{t['privacy']}</a>
+        {info}
         <a href="{other[0]}" hreflang="{'id' if lang=='en' else 'en'}">{other[1]}</a>
-        <a href="https://github.com/rizkynandapr/tooldock" rel="noopener">GitHub</a>
+        <a href="{M.REPO}" rel="noopener">GitHub</a>
       </nav>
     </div>
   </div>
@@ -140,9 +146,9 @@ def footer(lang):
 </html>
 """
 
-def ad(lang):
-    a, b = TXT[lang]["ad"]
-    return f'<aside class="ad-slot" aria-label="{a}"><span>{a}</span><small>{b}</small></aside>'
+def slot(lang, key):
+    """The page's one money slot (sponsored offer or support box). Config: monetize.py."""
+    return M.slot(lang, key)
 
 def faq_block(faqs):
     return "\n".join(f"<details>\n  <summary>{E(q)}</summary>\n  <p>{E(a)}</p>\n</details>" for q, a in faqs)
@@ -220,7 +226,7 @@ def render_tool(lang, tid):
 {steps}
     </ol>
   </section>
-  {ad(lang)}
+  {slot(lang, tid)}
   <section class="section faq">
     <h2>{ui['faq']}</h2>
 {faq_block(d["faqs"])}
@@ -286,7 +292,7 @@ def render_size(lang, key, nbytes, label):
 {steps}
     </ol>
   </section>
-  {ad(lang)}
+  {slot(lang, "compress-pdf")}
   <section class="section faq">
     <h2>{ui['faq']}</h2>
 {faq_block(d["faqs"])}
@@ -305,6 +311,16 @@ def render_size(lang, key, nbytes, label):
     return url
 
 # ------------------------------------------------------------------ home
+_COUNT = {
+ "en": ("We count page views and tool runs anonymously, without your IP address or anything about your files."
+        if M.ANALYTICS else "Nothing is counted or tracked."),
+ "id": ("Kami menghitung kunjungan halaman dan pemakaian alat secara anonim, tanpa alamat IP dan tanpa data apa pun soal filemu."
+        if M.ANALYTICS else "Tidak ada yang dihitung atau dilacak."),
+}
+PRIVACY_SHORT = {
+ "en": f'Your files are processed in your browser and never reach us. There are no accounts and no cookies. {_COUNT["en"]} <a href="/privacy/">The privacy page</a> has the details. Questions: <a href="mailto:{CONTACT}">{CONTACT}</a>.',
+ "id": f'Filemu diproses di browser dan tidak pernah sampai ke kami. Situs ini tidak memakai akun atau cookie. {_COUNT["id"]} Detailnya ada di <a href="/id/privacy/">halaman privasi</a>. Ada pertanyaan? <a href="mailto:{CONTACT}">{CONTACT}</a>.',
+}
 HOME_EN = dict(
  title="Fileloka: Free PDF and Image Tools That Don't Upload Your Files",
  meta="Compress, merge and split PDFs, convert and resize images, make QR codes and more. Free and without sign-up. Every tool runs in your browser, so your files stay on your device.",
@@ -326,10 +342,10 @@ HOME_EN = dict(
  faqs=[("Are my files really private?", "Yes, and you can check. Open your browser's developer tools (F12, then the Network tab) while you use a tool and you'll see no file being sent. You can also load a page, switch off your internet, and the tools keep working."),
        ("Is there a file size limit?", "Not one we set. Your device's memory is the limit, and most phones and laptops handle files up to around 100 MB without trouble. Big scans take longer on older devices because they're doing the work."),
        ("Can I compress a PDF to an exact size like 200 KB?", "Yes. Open Compress PDF, choose Target size and pick 100 KB, 200 KB, 500 KB or 1 MB, or type your own number. Fileloka finds the best quality that fits under it."),
-       ("Why is it free?", "Your device does the processing, so hosting costs very little. One clearly labelled ad spot is enough to cover it, and every tool works fully without a watermark."),
+       ("Why is it free?", "Your device does the processing, so running the site costs very little. Every tool works fully, without a watermark or a daily limit."),
        ("Can I use it for work or for clients?", "Yes. Since files never leave your device, it's a better fit for contracts, IDs and invoices than sites that keep copies on their servers.")],
  privacy_h="Privacy, in plain words",
- privacy=f"Your files are processed in your browser and never reach us. There are no accounts, cookies or analytics on this site. If we show ads in the future, the ad provider may set its own cookies, but that never touches your files. Questions: <a href=\"mailto:{CONTACT}\">{CONTACT}</a>.",
+ privacy=PRIVACY_SHORT["en"],
 )
 HOME_ID2 = dict(
  title=HOME_ID["title"], meta=HOME_ID["meta"],
@@ -349,7 +365,7 @@ HOME_ID2 = dict(
  faq_h=HOME_ID["faq_h"],
  faqs=HOME_ID["faqs"][:2] + [("Bisa kompres PDF ke ukuran tertentu, misalnya 200 KB?", "Bisa. Buka Kompres PDF, pilih Target ukuran, lalu klik 100 KB, 200 KB, 500 KB, atau 1 MB. Bisa juga ketik angka sendiri. Fileloka mencarikan kualitas terbaik yang masih muat di bawahnya.")] + HOME_ID["faqs"][2:],
  privacy_h=HOME_ID["privacy_h"],
- privacy=f"Filemu diproses di browser dan tidak pernah sampai ke kami. Situs ini tidak memakai akun, cookie, atau analytics. Kalau nanti ada iklan, penyedia iklannya mungkin memasang cookie sendiri, tapi itu tidak pernah menyentuh filemu. Ada pertanyaan? <a href=\"mailto:{CONTACT}\">{CONTACT}</a>.",
+ privacy=PRIVACY_SHORT["id"],
 )
 WHY_ICONS = [
  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="m9.5 11.5 2 2 3.5-3.5"/></svg>',
@@ -438,7 +454,7 @@ def render_home(lang):
       {size_links(lang)}
     </section>
 
-    {ad(lang)}
+    {slot(lang, "home")}
 
     <section class="section" id="why">
       <h2>{E(H['why_h'])}</h2>
@@ -469,6 +485,37 @@ def render_home(lang):
     write(f"{pre}index.html", page)
     return url
 
+# ------------------------------------------------------------------ trust pages
+def render_info(lang, slug):
+    d, t, pre = CP.page(lang, slug, CONTACT), TXT[lang], PREFIX[lang]
+    url = f"{DOMAIN}/{pre}{slug}/"
+    en_url, id_url = f"{DOMAIN}/{slug}/", f"{DOMAIN}/id/{slug}/"
+    twin = id_url if lang == "en" else en_url
+    crumbs = [(t["home"], f"{DOMAIN}/{pre}"), (CP.NAV[lang][slug], url)]
+    blocks = []
+    for h2, paras in d["sections"]:
+        body = "\n".join(f"    <p>{p}</p>" for p in paras)
+        blocks.append(f"    <h2>{E(h2)}</h2>\n{body}")
+    page = head(lang, d["title"], d["meta"], url, [("en", en_url), ("id", id_url), ("x-default", en_url)], [crumbs_ld(crumbs)])
+    page += f"""
+<body>
+{topbar(lang, twin)}
+<main class="wrap">
+  <div class="tool-hero">
+    {crumbs_html(lang, crumbs)}
+    <h1>{E(d["h1"])}</h1>
+    <p class="lead">{E(d["lead"])}</p>
+  </div>
+  <section class="section doc">
+{chr(10).join(blocks)}
+    <p class="doc-date">{CP.UPDATED_LABEL[lang]}: {CP.UPDATED[lang]}</p>
+  </section>
+</main>
+"""
+    page += footer(lang)
+    write(f"{pre}{slug}/index.html", page)
+    return url
+
 def render_404():
     t = TXT["en"]
     page = head("en", "Page not found | Fileloka", "This page doesn't exist. Browse Fileloka's free, private PDF and image tools.",
@@ -490,6 +537,7 @@ def render_404():
     write("404.html", page)
 
 def main():
+    M.validate()
     urls = []
     for lang in ("en", "id"):
         urls.append(render_home(lang))
@@ -497,7 +545,14 @@ def main():
             urls.append(render_tool(lang, tid))
         for k, b, lab in SIZES:
             urls.append(render_size(lang, k, b, lab))
+        for slug in CP.ORDER:
+            urls.append(render_info(lang, slug))
     render_404()
+    ads = M.ads_txt()
+    if ads:
+        write("ads.txt", ads)
+    elif os.path.exists(os.path.join(ROOT, "ads.txt")):
+        os.remove(os.path.join(ROOT, "ads.txt"))
     sm = ['<?xml version="1.0" encoding="UTF-8"?>',
           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">']
     for u in urls:

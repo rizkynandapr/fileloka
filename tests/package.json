@@ -1,6 +1,6 @@
 {
   "name": "fileloka-tests",
   "private": true,
-  "scripts": { "test": "node test.js" },
+  "scripts": { "test": "node test.js && node beacon.test.mjs" },
   "dependencies": { "pdf-lib": "1.17.1", "jszip": "3.10.1" }
 }

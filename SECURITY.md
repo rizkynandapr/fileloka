@@ -72,7 +72,18 @@ Yang **sengaja tidak dipakai**: COEP/`require-corp` (tidak butuh SharedArrayBuff
 - Password generator: `crypto.getRandomValues` + rejection sampling (tanpa modulo bias) + jaminan tiap charset terwakili — teruji 300 sampel.
 - File terenkripsi/korup ditolak dengan pesan jelas, tidak setengah diproses.
 - Re-encode JPG/WebP otomatis membuang metadata EXIF (lokasi GPS, perangkat) — bonus privasi, disebut di UI.
-- Nol storage: tanpa cookie, `localStorage`, tracker, analytics. Tidak ada consent banner karena memang tidak ada yang dikumpulkan.
+- Nol storage: tanpa cookie, `localStorage`, dan tracker pihak ketiga. Tidak ada consent banner karena tidak ada yang disimpan di perangkat pengunjung dan tidak ada data pribadi yang dikumpulkan.
+
+### 2.5 Endpoint penghitung `/api/e` (satu-satunya kode server)
+`functions/api/e.js` menerima hitungan anonim dari `app.js` (halaman dibuka, alat selesai, unduh, klik slot) dan menulisnya ke Workers Analytics Engine. File pengguna tetap tidak pernah menyentuh server.
+- **Yang disimpan**: nama event, id alat/slot, path halaman, bahasa, kode negara dari Cloudflare, kelas perangkat (`m`/`d`). **Tidak disimpan**: IP, user agent, cookie, id pengunjung, apa pun soal file.
+- **Validasi ketat**: event dan bahasa dari daftar tetap; id alat `^[a-z0-9-]{0,40}$`; path `^/[a-z0-9/-]{0,80}$` (query string, huruf besar, dan nama file otomatis tertolak); body maksimal 512 byte.
+- **Tidak ada yang dipantulkan**: jawaban selalu `204` kosong, input salah dibuang diam-diam, jadi tidak ada permukaan XSS/injection dan tidak ada yang bisa di-probe.
+- **Hanya same-origin**: request dengan `Sec-Fetch-Site` selain `same-origin` atau `Origin` asing dibuang; user agent bot dibuang.
+- **Radius ledakan**: `_routes.json` membatasi Function ke `/api/*`, jadi halaman statis tidak pernah lewat Function. Skenario terburuk adalah angka statistik digelembungkan atau kuota Function harian habis; situsnya tetap jalan. Penutupnya: satu rate limiting rule (MONETIZATION.md, bagian Pengaman).
+- **CSP tidak berubah**: beacon dikirim ke origin sendiri (`connect-src 'self'`). Klaim "nol request pihak ketiga" tetap benar.
+- Menghormati Do Not Track dan Global Privacy Control; bisa dimatikan total lewat `ANALYTICS = False` di `scripts/monetize.py`.
+- Teruji di `tests/beacon.test.mjs` (30 kasus).
 
 ---
 
@@ -102,7 +113,7 @@ Untuk situs statis yang sudah dikeraskan, jalur pembobolan yang realistis bukan 
    unduh ketiga font (Gabarito, Public Sans, IBM Plex Mono) sebagai `woff2` via google-webfonts-helper → taruh di `/fonts/` + satu `fonts.css` `@font-face` → ganti `<link>` Google Fonts → di CSP, kecilkan `style-src` ke `'self' 'unsafe-inline'` dan `font-src` ke `'self'`. Setelah ini, **satu-satunya koneksi keluar situs = nol**.
 2. Hapus semua atribut `style="…"` → class, lalu buang `'unsafe-inline'` dari `style-src`.
 3. Subresource pinning di sisi user berlebihan untuk same-origin (attacker yang bisa ubah `/lib` bisa ubah HTML-nya juga) — fokus tetap di §3.
-4. Saat menambah **AdSense** nanti: itu berarti mengizinkan script Google (longgarkan CSP sesuai domain resmi Google) — trade-off sadar antara monetisasi vs "zero third-party". Dokumentasikan di halaman privacy saat itu terjadi.
+4. Saat menayangkan iklan **AdSense** nanti: Google hanya mendukung CSP berbasis nonce + `'strict-dynamic'` (bukan allowlist domain), jadi CSP sekarang harus diganti di halaman beriklan dan tiap HTML harus lewat Function untuk nonce per request — trade-off sadar antara monetisasi vs "zero third-party". Rinciannya di MONETIZATION.md §5; halaman privacy sudah menulis ulang dirinya otomatis saat `ADSENSE_CLIENT` diisi. Verifikasi kepemilikan (meta tag + `ads.txt`) tidak butuh perubahan CSP.
 
 ---
 

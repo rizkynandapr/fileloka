@@ -8,6 +8,20 @@ const DEFAULT_TITLE=document.title;
 const LANG=/^id\b/i.test(document.documentElement.lang||'')?'id':'en';
 const T=(en,id)=>LANG==='id'?id:en;
 
+/* ================= anonymous counters =================
+   First-party and cookieless: one small POST to /api/e on this same origin
+   (functions/api/e.js). It carries the event name, the tool id, the page path
+   and the page language. Never a file name, a file size or file content.
+   Off when the page has no data-ping flag (scripts/monetize.py: ANALYTICS),
+   and off when the browser sends Do Not Track or Global Privacy Control. */
+const PING_ON=document.documentElement.dataset.ping==='1'&&!!navigator.sendBeacon&&!navigator.webdriver
+  &&navigator.doNotTrack!=='1'&&!navigator.globalPrivacyControl;
+let curTool=document.body.dataset.tool||'';
+function ping(ev,target){
+  if(!PING_ON)return;
+  try{navigator.sendBeacon('/api/e',JSON.stringify({e:ev,t:target===undefined?curTool:target,p:location.pathname,l:LANG}));}catch(_){}
+}
+
 function h(html){const t=document.createElement('template');t.innerHTML=html.trim();return t.content.firstElementChild;}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function fmtBytes(n){
@@ -23,6 +37,7 @@ function downloadBlob(blob,name){
   a.href=URL.createObjectURL(blob);a.download=name;
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+  ping('dl');
 }
 function toast(msg,isErr){
   const t=h('<div class="toast'+(isErr?' err':'')+'"></div>');
@@ -105,6 +120,7 @@ function route(){
     toolView.classList.add('is-active');
     mount.innerHTML='';
     document.title=TOOLS[id].name+' | Fileloka';
+    curTool=id;ping('open');
     let files=null;
     if(pendingFiles){files=pendingFiles.filter(TOOLS[id].match);pendingFiles=null;if(!files.length)files=null;}
     TOOLS[id].mount(mount,files);
@@ -114,6 +130,7 @@ function route(){
     homeView.classList.add('is-active');
     mount.innerHTML='';
     document.title=DEFAULT_TITLE;
+    curTool='';
   }
 }
 on(window,'hashchange',route);
@@ -281,7 +298,12 @@ function showResult(root,{title,stats,items,note,pre}){
     });
     acts.appendChild(zipBtn);
   }
+  const sup=$('a[data-slot="support"]');
+  if(sup)acts.insertAdjacentHTML('afterend','<p class="note tip">'+T('Saved you some time? ','Terbantu? ')+
+    '<a href="'+esc(sup.getAttribute('href'))+'" target="_blank" rel="noopener" data-slot="support-result">'+
+    T('Chip in to keep Fileloka free','Ikut patungan biar Fileloka tetap gratis')+'</a>.</p>');
   if(note)acts.insertAdjacentHTML('afterend','<p class="note">'+note+'</p>');
+  ping('use');
   el.classList.add('show');
   el.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
@@ -1480,4 +1502,6 @@ TOOLS['signature']={
 applyTheme();
 filterCards();
 route();
+on(document,'click',e=>{const a=e.target.closest&&e.target.closest('a[data-slot]');if(a)ping('out',a.dataset.slot);});
+ping('pv');
 })();
